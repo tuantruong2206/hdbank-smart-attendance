@@ -6,7 +6,11 @@ import com.hdbank.attendance.application.dto.CheckInResult;
 import com.hdbank.attendance.application.port.in.CheckInUseCase;
 import com.hdbank.attendance.application.port.in.CheckOutUseCase;
 import com.hdbank.attendance.application.port.out.AttendanceRepository;
+import com.hdbank.attendance.application.port.out.LateGraceQuotaRepository;
+import com.hdbank.attendance.application.port.out.ShiftRepository;
 import com.hdbank.attendance.domain.model.AttendanceRecord;
+import com.hdbank.attendance.domain.model.LateGraceQuota;
+import com.hdbank.attendance.domain.model.Shift;
 import com.hdbank.attendance.domain.valueobject.BssidSignal;
 import com.hdbank.attendance.domain.valueobject.GpsCoordinate;
 import com.hdbank.common.dto.ApiResponse;
@@ -18,7 +22,9 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -29,6 +35,8 @@ public class CheckInController {
     private final CheckInUseCase checkInUseCase;
     private final CheckOutUseCase checkOutUseCase;
     private final AttendanceRepository attendanceRepository;
+    private final ShiftRepository shiftRepository;
+    private final LateGraceQuotaRepository lateGraceQuotaRepository;
 
     @PostMapping("/check-in")
     public ResponseEntity<ApiResponse<CheckInResult>> checkIn(
@@ -70,6 +78,50 @@ public class CheckInController {
         Instant end = LocalDate.parse(to).plusDays(1).atStartOfDay(vnZone).toInstant();
         List<AttendanceRecord> records = attendanceRepository.findByEmployeeAndTimeRange(employeeId, start, end);
         return ResponseEntity.ok(ApiResponse.success(records));
+    }
+
+    @GetMapping("/current-shift")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getCurrentShift(
+            @RequestHeader("X-User-Id") String userId) {
+        UUID employeeId = UUID.fromString(userId);
+        Shift shift = shiftRepository.findCurrentShiftForEmployee(employeeId, Instant.now())
+                .orElse(null);
+        Map<String, Object> result = new LinkedHashMap<>();
+        if (shift != null) {
+            result.put("shiftName", shift.getName());
+            result.put("shiftStart", shift.getStartTime().toString());
+            result.put("shiftEnd", shift.getEndTime().toString());
+            result.put("shiftCode", shift.getCode());
+            result.put("gracePeriodMinutes", shift.getGracePeriodMinutes());
+        } else {
+            result.put("shiftName", "Ca sáng (mặc định)");
+            result.put("shiftStart", "08:00");
+            result.put("shiftEnd", "17:00");
+            result.put("shiftCode", "STD");
+            result.put("gracePeriodMinutes", 15);
+        }
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+    @GetMapping("/late-grace-quota")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getLateGraceQuota(
+            @RequestHeader("X-User-Id") String userId) {
+        UUID employeeId = UUID.fromString(userId);
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+        LateGraceQuota quota = lateGraceQuotaRepository
+                .findByEmployeeAndMonth(employeeId, today.getYear(), today.getMonthValue())
+                .orElse(null);
+        Map<String, Object> result = new LinkedHashMap<>();
+        if (quota != null) {
+            result.put("used", quota.getUsedCount());
+            result.put("total", quota.getMaxAllowed());
+            result.put("remaining", quota.getRemainingCount());
+        } else {
+            result.put("used", 0);
+            result.put("total", 4);
+            result.put("remaining", 4);
+        }
+        return ResponseEntity.ok(ApiResponse.success(result));
     }
 
     private CheckInCommand toCommand(CheckInRequest req, UUID userId) {
