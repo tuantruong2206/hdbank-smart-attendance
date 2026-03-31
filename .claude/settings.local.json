@@ -43,7 +43,11 @@
       "Bash(find backend/notification-service -name *.java -newer backend/build.gradle.kts)",
       "Bash(find ./web/src -name *.tsx -o -name *.ts)",
       "Bash(find ./mobile/src -name *.tsx -o -name *.ts)",
-      "Bash(git status:*)"
+      "Bash(git status:*)",
+      "Bash(grep -E \"\\\\.env$|credentials|secret\")",
+      "Bash(git commit:*)",
+      "Bash(git remote:*)",
+      "Bash(git push:*)"
     ]
   }
 }

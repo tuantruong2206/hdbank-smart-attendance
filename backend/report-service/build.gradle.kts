@@ -18,5 +18,7 @@ dependencies {
     implementation("io.minio:minio:8.5.12")
     implementation("com.alibaba:easyexcel:4.0.3")
     implementation("com.github.librepdf:openpdf:2.0.3")
+    implementation("io.github.resilience4j:resilience4j-spring-boot3:2.2.0")
+    implementation("org.springframework.boot:spring-boot-starter-aop")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

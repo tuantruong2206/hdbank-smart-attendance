@@ -10,6 +10,8 @@ import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.GetPresignedObjectUrlArgs;
@@ -208,7 +210,9 @@ public class ReportExportService {
         }
     }
 
-    private void uploadToMinio(String objectKey, byte[] data, String contentType) throws Exception {
+    @CircuitBreaker(name = "minio-upload", fallbackMethod = "uploadToMinioFallback")
+    @Retry(name = "minio-upload")
+    protected void uploadToMinio(String objectKey, byte[] data, String contentType) throws Exception {
         minioClient.putObject(PutObjectArgs.builder()
                 .bucket(minioBucket)
                 .object(objectKey)
@@ -217,12 +221,34 @@ public class ReportExportService {
                 .build());
     }
 
-    private String getPresignedUrl(String objectKey) throws Exception {
+    @CircuitBreaker(name = "minio-upload", fallbackMethod = "getPresignedUrlFallback")
+    @Retry(name = "minio-upload")
+    protected String getPresignedUrl(String objectKey) throws Exception {
         return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
                 .bucket(minioBucket)
                 .object(objectKey)
                 .method(Method.GET)
                 .expiry(24 * 60 * 60) // 24 hours
                 .build());
+    }
+
+    /**
+     * Fallback when MinIO upload circuit breaker is open or retries exhausted.
+     */
+    @SuppressWarnings("unused")
+    private void uploadToMinioFallback(String objectKey, byte[] data, String contentType, Throwable t) throws Exception {
+        log.error("Circuit breaker fallback for MinIO upload of {}: {} - {}",
+                objectKey, t.getClass().getSimpleName(), t.getMessage());
+        throw new RuntimeException("MinIO upload unavailable: " + t.getMessage(), t);
+    }
+
+    /**
+     * Fallback when MinIO presigned URL circuit breaker is open or retries exhausted.
+     */
+    @SuppressWarnings("unused")
+    private String getPresignedUrlFallback(String objectKey, Throwable t) throws Exception {
+        log.error("Circuit breaker fallback for MinIO presigned URL of {}: {} - {}",
+                objectKey, t.getClass().getSimpleName(), t.getMessage());
+        throw new RuntimeException("MinIO presigned URL unavailable: " + t.getMessage(), t);
     }
 }

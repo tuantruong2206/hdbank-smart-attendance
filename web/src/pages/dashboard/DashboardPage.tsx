@@ -1,93 +1,199 @@
-import { Typography, Spin, Row, Col, Card, Table, Tag, Alert } from 'antd';
-import { useQuery } from '@tanstack/react-query';
-import api from '@/shared/api/axiosInstance';
+import { Typography, Spin, Row, Col, Divider } from 'antd';
 import { useAuth } from '@/shared/hooks/useAuth';
-import StatCards from '@/features/dashboard/components/StatCards';
+import { useDashboardData } from '@/features/dashboard/hooks/useDashboardData';
+import {
+  // Employee (1-11)
+  TodayStatus,
+  PersonalAttendanceCount,
+  LateCount,
+  LeaveBalance,
+  LateGraceQuota,
+  CurrentShift,
+  MonthlyOTHours,
+  UpcomingHolidays,
+  PendingLeaveRequests,
+  RecentNotifications,
+  WeeklyAttendanceSummary,
+  // Manager (12-20)
+  TeamAttendanceRate,
+  TeamPulseTable,
+  PendingApprovalsCount,
+  LateEmployeesToday,
+  AbsentList,
+  LeaveCalendar,
+  BranchKPITrend,
+  TeamOTSummary,
+  SuspiciousRecords,
+  // Executive (21-27)
+  OrgAttendanceRate,
+  BranchComparison,
+  AttendanceTrend,
+  AnomalySummary,
+  LeaveRate,
+  EscalationSummary,
+  WorkforceDistribution,
+  // System Admin (28-30)
+  SystemHealth,
+  PendingConfigChanges,
+  RecentAuditLog,
+} from '@/features/dashboard/components/widgets';
 import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
 
-const recentColumns = [
-  { title: 'Mã NV', dataIndex: 'employeeCode', key: 'code' },
-  { title: 'Loại', dataIndex: 'checkType', key: 'type',
-    render: (t: string) => t === 'CHECK_IN' ? <Tag color="green">Vào</Tag> : <Tag color="blue">Ra</Tag> },
-  { title: 'Thời gian', dataIndex: 'checkTime', key: 'time',
-    render: (t: string) => dayjs(t).format('HH:mm:ss') },
-  { title: 'Phương thức', dataIndex: 'verificationMethod', key: 'method',
-    render: (m: string) => <Tag>{m}</Tag> },
-  { title: 'Trạng thái', dataIndex: 'status', key: 'status',
-    render: (s: string) => {
-      const color = s === 'VALID' ? 'green' : s === 'SUSPICIOUS' ? 'red' : 'orange';
-      return <Tag color={color}>{s}</Tag>;
-    }
-  },
-];
-
 export default function DashboardPage() {
   const { user } = useAuth();
+  const dashboard = useDashboardData();
 
-  const { data: metrics, isLoading: metricsLoading } = useQuery({
-    queryKey: ['dashboard-metrics'],
-    queryFn: () => api.get('/dashboard/metrics').then((r) => r.data.data),
-    refetchInterval: 30000,
-  });
-
-  const { data: recentActivity } = useQuery({
-    queryKey: ['attendance-today'],
-    queryFn: () => api.get('/attendance/today').then((r) => r.data.data).catch(() => []),
-  });
-
-  const isManager = ['SYSTEM_ADMIN', 'CEO', 'DIVISION_DIRECTOR', 'REGION_DIRECTOR', 'DEPT_HEAD', 'DEPUTY_HEAD', 'UNIT_HEAD'].includes(user?.role || '');
-
-  if (metricsLoading) return <div style={{ textAlign: 'center', padding: 50 }}><Spin size="large" /></div>;
+  if (!user) {
+    return <div style={{ textAlign: 'center', padding: 50 }}><Spin size="large" /></div>;
+  }
 
   return (
     <div>
-      <Title level={4}>Tổng quan — {dayjs().format('DD/MM/YYYY')}</Title>
-      <Text type="secondary">Xin chào, {user?.fullName}! Vai trò: {user?.role}</Text>
+      <Title level={4}>Tong quan — {dayjs().format('DD/MM/YYYY')}</Title>
+      <Text type="secondary">Xin chao, {user.fullName}! Vai tro: {user.role}</Text>
 
-      <div style={{ marginTop: 20 }}>
-        <StatCards metrics={metrics || { presentToday: 0, lateToday: 0, onLeave: 0, pendingApprovals: 0 }} />
-      </div>
+      {/* === EMPLOYEE WIDGETS === */}
+      {dashboard.showEmployee && (
+        <>
+          <Divider orientation="left">Thong tin ca nhan</Divider>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} sm={12} md={8} lg={6}>
+              <TodayStatus query={dashboard.todayStatus} />
+            </Col>
+            <Col xs={24} sm={12} md={8} lg={6}>
+              <PersonalAttendanceCount query={dashboard.personalAttendance} />
+            </Col>
+            <Col xs={24} sm={12} md={8} lg={6}>
+              <LateCount query={dashboard.lateCount} />
+            </Col>
+            <Col xs={24} sm={12} md={8} lg={6}>
+              <LateGraceQuota query={dashboard.lateGraceQuota} />
+            </Col>
+            <Col xs={24} sm={12} md={8} lg={6}>
+              <CurrentShift query={dashboard.currentShift} />
+            </Col>
+            <Col xs={24} sm={12} md={8} lg={6}>
+              <MonthlyOTHours query={dashboard.monthlyOT} />
+            </Col>
+            <Col xs={24} sm={12} md={8} lg={6}>
+              <PendingLeaveRequests query={dashboard.pendingLeaveReqs} />
+            </Col>
+            <Col xs={24} sm={12} md={8} lg={6}>
+              <LeaveBalance query={dashboard.leaveBalance} />
+            </Col>
+          </Row>
+          <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+            <Col xs={24} md={12}>
+              <WeeklyAttendanceSummary query={dashboard.weeklySummary} />
+            </Col>
+            <Col xs={24} md={12}>
+              <UpcomingHolidays query={dashboard.upcomingHolidays} />
+            </Col>
+          </Row>
+          <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+            <Col xs={24}>
+              <RecentNotifications query={dashboard.recentNotifications} />
+            </Col>
+          </Row>
+        </>
+      )}
 
-      {isManager && (
-        <Row gutter={16} style={{ marginTop: 24 }}>
-          <Col span={16}>
-            <Card title="Hoạt động chấm công gần đây">
-              <Table
-                columns={recentColumns}
-                dataSource={recentActivity || []}
-                rowKey="id"
-                size="small"
-                pagination={{ pageSize: 10 }}
-              />
-            </Card>
-          </Col>
-          <Col span={8}>
-            <Card title="Thông tin nhanh">
-              <div style={{ marginBottom: 12 }}>
-                <Text strong>Tỷ lệ chấm công:</Text>
-                <Title level={3} style={{ margin: 0, color: '#3f8600' }}>
-                  {metrics?.attendanceRate || 0}%
-                </Title>
-              </div>
-              <div style={{ marginBottom: 12 }}>
-                <Text strong>Tỷ lệ đúng giờ:</Text>
-                <Title level={3} style={{ margin: 0, color: '#1677ff' }}>
-                  {metrics?.onTimeRate || 0}%
-                </Title>
-              </div>
-              {(metrics?.suspiciousRecords || 0) > 0 && (
-                <Alert
-                  message={`${metrics.suspiciousRecords} bản ghi đáng ngờ`}
-                  type="warning"
-                  showIcon
-                  style={{ marginTop: 12 }}
-                />
-              )}
-            </Card>
-          </Col>
-        </Row>
+      {/* === MANAGER WIDGETS === */}
+      {dashboard.showManager && (
+        <>
+          <Divider orientation="left">Quan ly nhom</Divider>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} sm={12} md={8} lg={6}>
+              <TeamAttendanceRate query={dashboard.teamAttendanceRate} />
+            </Col>
+            <Col xs={24} sm={12} md={8} lg={6}>
+              <PendingApprovalsCount query={dashboard.pendingApprovals} />
+            </Col>
+            <Col xs={24} sm={12} md={8} lg={6}>
+              <TeamOTSummary query={dashboard.teamOTSummary} />
+            </Col>
+            <Col xs={24} sm={12} md={8} lg={6}>
+              <SuspiciousRecords query={dashboard.suspiciousRecords} />
+            </Col>
+          </Row>
+          <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+            <Col xs={24} lg={12}>
+              <TeamPulseTable query={dashboard.teamPulse} />
+            </Col>
+            <Col xs={24} lg={12}>
+              <LateEmployeesToday query={dashboard.lateEmployees} />
+            </Col>
+          </Row>
+          <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+            <Col xs={24} lg={12}>
+              <AbsentList query={dashboard.absentList} />
+            </Col>
+            <Col xs={24} lg={12}>
+              <LeaveCalendar query={dashboard.leaveCalendar} />
+            </Col>
+          </Row>
+          <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+            <Col xs={24}>
+              <BranchKPITrend query={dashboard.branchKPITrend} />
+            </Col>
+          </Row>
+        </>
+      )}
+
+      {/* === EXECUTIVE WIDGETS === */}
+      {dashboard.showExecutive && (
+        <>
+          <Divider orientation="left">Tong quan dieu hanh</Divider>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} sm={12} md={8}>
+              <OrgAttendanceRate query={dashboard.orgAttendanceRate} />
+            </Col>
+            <Col xs={24} sm={12} md={8}>
+              <LeaveRate query={dashboard.leaveRate} />
+            </Col>
+            <Col xs={24} sm={12} md={8}>
+              <EscalationSummary query={dashboard.escalationSummary} />
+            </Col>
+          </Row>
+          <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+            <Col xs={24} sm={12} md={8}>
+              <AnomalySummary query={dashboard.anomalySummary} />
+            </Col>
+            <Col xs={24} sm={12} md={16}>
+              <WorkforceDistribution query={dashboard.workforceDistribution} />
+            </Col>
+          </Row>
+          <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+            <Col xs={24} lg={12}>
+              <BranchComparison query={dashboard.branchComparison} />
+            </Col>
+            <Col xs={24} lg={12}>
+              <AttendanceTrend query={dashboard.attendanceTrend} />
+            </Col>
+          </Row>
+        </>
+      )}
+
+      {/* === SYSTEM ADMIN WIDGETS === */}
+      {dashboard.showAdmin && (
+        <>
+          <Divider orientation="left">Quan tri he thong</Divider>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} sm={12} md={8}>
+              <SystemHealth query={dashboard.systemHealth} />
+            </Col>
+            <Col xs={24} sm={12} md={8}>
+              <PendingConfigChanges query={dashboard.pendingConfigChanges} />
+            </Col>
+          </Row>
+          <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+            <Col xs={24}>
+              <RecentAuditLog query={dashboard.recentAuditLog} />
+            </Col>
+          </Row>
+        </>
       )}
     </div>
   );

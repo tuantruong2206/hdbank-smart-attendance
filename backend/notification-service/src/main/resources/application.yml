@@ -27,6 +27,28 @@ spring:
     port: 1025
 ntfy:
   url: http://localhost:8095
+resilience4j:
+  circuitbreaker:
+    instances:
+      ntfy-push:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+      email-send:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+  retry:
+    instances:
+      ntfy-push:
+        max-attempts: 3
+        wait-duration: 2s
+      email-send:
+        max-attempts: 2
+        wait-duration: 1s
+
 management:
   endpoints:
     web:
