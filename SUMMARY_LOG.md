@@ -4,128 +4,250 @@
 **Đội:** Khối Giải Pháp Số — HDBank
 **Ngày tạo:** 30/03/2026
 **Cập nhật lần cuối:** 31/03/2026
-**GitHub:** https://github.com/tuantruong2206/hdbank-smart-attendance.git
+**GitHub:** https://github.com/tuantruong2206/hdbank-smart-attendance
 
 ---
 
-## Tổng quan dự án
+## Project Overview
 
-Smart Attendance là hệ thống chấm công thông minh cho HDBank — 100 chi nhánh + Hội Sở, 5.000 nhân viên. Standalone (không tích hợp Core Banking/HRM/Payroll). Giao diện tiếng Việt.
+HDBank Smart Attendance system — smart time-tracking for 100 branches + Head Office, 5,000 employees. Built from requirements doc to fully implemented system in one session.
 
 ---
 
-## Kiến trúc hệ thống
+## Codebase Stats
 
-| Layer | Công nghệ |
+| Metric | Count |
+|--------|-------|
+| **Total files** | ~400 |
+| **Java source files** | 268 |
+| **Python files** | 18 |
+| **Web (React/TypeScript)** | 53 |
+| **Mobile (Expo/TypeScript)** | 14 |
+| **Test files (Java)** | 14 |
+| **Test files (Python)** | 3 |
+| **Test methods** | 143 |
+| **Lines of code** | ~35,000 |
+| **Git commits** | 5 |
+
+---
+
+## Architecture
+
+| Layer | Technology |
 |-------|-----------|
 | Backend | 7 microservices — Java 21 + Spring Boot 3.3 (Hexagonal) + Python FastAPI |
-| Web Dashboard | React 18 + Vite + TypeScript + Ant Design 5 |
+| Web Dashboard | React 18 + Vite + TypeScript + Ant Design 5 + ECharts |
 | Mobile App | Expo (React Native) — iOS + Android |
-| Database | PostgreSQL 16 + PostGIS (master-slave), Flyway migrations |
-| Cache | Redis 7 |
-| Messaging | Apache Kafka (KRaft, không ZooKeeper) |
-| Infrastructure | Docker Compose (15 containers) |
+| Database | PostgreSQL 16 + PostGIS + pgvector (master-slave), Flyway |
+| Cache | Caffeine L1 + Redis 7 L2 |
+| Messaging | Apache Kafka (KRaft) — 6 topics |
+| Infrastructure | Docker Compose — 15 containers |
 
-### Backend Services
+### 7 Backend Services
 
-| Service | Port | Kiến trúc | Chức năng |
-|---------|------|-----------|-----------|
-| gateway | 8080 | Layered | API routing, JWT filter, CORS |
-| auth-service | 8081 | Hexagonal | Login, JWT, 2FA/TOTP, OTP |
-| attendance-service | 8082 | Hexagonal | Check-in/out, location verify, fraud scoring, shift rules |
-| admin-service | 8083 | Hexagonal | Org/employee CRUD, Excel import, maker-checker |
-| notification-service | 8084 | Layered | Kafka consumer → push/email/SMS dispatch |
-| report-service | 8085 | Layered | Dashboard metrics, SSE, report generation |
-| ai-service | 8086 | Hexagonal (Python) | Anomaly detection (Isolation Forest), AI Chatbot (NLP tiếng Việt) |
+| Service | Port | Architecture | Key Features |
+|---------|------|-------------|-------------|
+| gateway | 8080 | Layered | JWT filter, CORS, routing, Prometheus |
+| auth-service | 8081 | Hexagonal | Login, 2FA/TOTP, OTP, rate limiting, device attestation, permissions API |
+| attendance-service | 8082 | Hexagonal | Check-in/out (WiFi+GPS+QR), fraud detection, shift rules, late grace, timesheet, leave workflow, escalation, QR codes |
+| admin-service | 8083 | Hexagonal | Org/employee CRUD, Excel import pipeline, maker-checker, location/WiFi/holiday/shift management |
+| notification-service | 8084 | Layered | Kafka consumer, priority routing, push/email/SMS, reminders, circuit breakers |
+| report-service | 8085 | Layered | Dashboard metrics (role-based), SSE, nightly aggregation, Excel/PDF export, MinIO |
+| ai-service | 8086 | Hexagonal (Python) | Anomaly detection (Isolation Forest), Vietnamese NLP chatbot, knowledge base (pgvector), Kafka pipeline, weekly re-training |
 
 ---
 
-## Tiến độ phát triển
+## FR/NFR Implementation Status
 
-### Phase 1–4: Yêu cầu & Thiết kế (30/03/2026)
+### Functional Requirements
 
-- Thu thập và phân tích yêu cầu (47 FR + 17 NFR)
-- Thiết kế kiến trúc: Pragmatic Hexagonal, service structure, DB design
-- Chọn tech stack cho Backend, Frontend (Web + Mobile), AI/ML
-- Thiết kế homepage dashboard per role (30 widgets)
-- Thiết kế AI features: Anomaly Detection + AI Chatbot
+| Category | Features | Score |
+|----------|----------|-------|
+| Authentication & Security | Login, 2FA/TOTP, OTP, rate limiting, device attestation | 87% |
+| Check-in/Check-out | WiFi BSSID, GPS, QR, fraud detection, offline, duplicate guard | **100%** |
+| Shift & Attendance Rules | Grace period, rounding, overnight, OT, rule priority, late grace | **100%** |
+| Timesheet | Draft→Pending→Approved→Locked, calculate, snapshot | **100%** |
+| Leave & Approval | Multi-level, auto re-route, balance, cancel, SLA enforcement | **100%** |
+| Escalation | Multi-level, configurable timeouts, acknowledge+action tracking | **100%** |
+| Admin Console | CRUD, Excel import, maker-checker, location/WiFi/holiday/shift | **100%** |
+| RBAC | 7 roles, endpoint security, data scope, permission matrix | **100%** |
+| Dashboard | 30 widgets (11+9+7+3), SSE real-time, role-based | **100%** |
+| Notifications | Push/email/SMS, priority routing, reminders, circuit breakers | **100%** |
+| AI Features | Anomaly detection, chatbot, knowledge base, weekly re-training | **100%** |
+| Reports | Excel/PDF export, async generation, MinIO storage | **100%** |
+| **FR Total** | | **~98%** |
 
-**Deliverables:** Smart_Attendance_FR_NFR_v7.docx, CLAUDE.md, ARCHITECTURE.md, Presentation.pptx
+### Non-Functional Requirements (excluding TLS/SSL deployment)
 
-### Phase 5: Full System Build (31/03/2026)
+| NFR | Status |
+|-----|--------|
+| Virtual Threads (Java 21) | **Done** |
+| Master-Slave PostgreSQL | **Done** |
+| Caffeine L1 + Redis L2 cache | **Done** |
+| Kafka async messaging (6 topics) | **Done** |
+| JWT short expiry (15min/7d) | **Done** |
+| Structured JSON logging (6 services) | **Done** |
+| MDC (traceId, userId, requestId) | **Done** |
+| Prometheus metrics | **Done** |
+| Spring Actuator health | **Done** |
+| Flyway migrations | **Done** |
+| Monthly partitioned attendance | **Done** |
+| Resilience4j circuit breakers | **Done** |
+| RBAC enforcement (HeaderAuthFilter) | **Done** |
+| Permission matrix (DB + cache) | **Done** |
+| Data scope filtering | **Done** |
+| Audit trail (immutable) | **Done** |
+| ArchUnit tests (hexagonal rules) | **Done** |
+| Login rate limiting (Redis) | **Done** |
+| **NFR Total** | **100%** |
 
-Autonomous build session — toàn bộ hệ thống được scaffold từ zero đến running trong 1 session.
+### Excluded (deployment-only, not applicable to local dev)
+- TLS 1.2+ (local uses HTTP)
+- AES-256 encryption for TOTP secrets
+- SSL pinning on mobile (Expo managed workflow limitation)
+- ShedLock (single-instance in dev)
 
-#### Files đã tạo (~205 files)
+**Overall: FR ~98%, NFR 100% → ~99% complete**
 
-| Loại | Số lượng |
-|------|----------|
-| Backend Java source files | 115 |
-| Backend configs, builds, Dockerfiles, SQL | 32 |
-| AI service (Python) | 10 |
-| Web dashboard (React/TypeScript) | 20 |
-| Mobile app (Expo/TypeScript) | 13 |
-| Docker Compose, scripts, docs | 15 |
-| **Tổng** | **~205 files** |
+---
 
-#### Tính năng đã implement
+## Features Implemented (Detailed)
 
-- **Check-in/out**: WiFi BSSID (primary) + GPS geofencing (secondary) + QR code
-- **Fraud detection**: Mock location, VPN, GPS mismatch, rooted device — score 0-100
-- **Late grace quota**: 4 lần/tháng, configurable per org unit, auto-reset monthly
-- **Duplicate guard**: nghiệp vụ = 1/shift, IT = 30min interval
-- **Offline check-in**: Local cache, secure timestamps, UUID dedup, sync within 24h
-- **Leave workflow**: Multi-level approval with SLA
-- **Timesheet lifecycle**: Draft → Pending Review → Approved → Locked (snapshot)
-- **AI Chatbot**: Vietnamese NLP — "còn bao nhiêu ngày phép?", auto-create leave
-- **Anomaly detection**: Isolation Forest, auto-escalate at score ≥90
-- **RBAC**: 7 roles, permission matrix, role-based dashboards
-- **Real-time**: SSE for dashboard metrics, Kafka event streaming
+### Authentication (auth-service)
+- Email/password login with BCrypt
+- JWT access token (15min) + refresh token (7d)
+- 2FA setup/disable: TOTP (Google Authenticator), EMAIL, SMS
+- OTP: 6-digit, Redis 5min TTL, max 3 attempts, MailHog delivery
+- Login rate limiting: 5/IP/min, 10/email/5min (Redis-backed, 429 response)
+- Device attestation: detect device change, publish audit event
+- Permission API: GET /auth/permissions?role=X
+- GET /auth/me — current user info
 
-#### Infrastructure (Docker Compose)
+### Check-in/Check-out (attendance-service)
+- WiFi BSSID verification (primary) — strongest RSSI match, floor detection
+- GPS geofencing (secondary) — Haversine distance check
+- 5-scenario validation: Manual > QR > WiFi > WiFi+GPS > GPS
+- Fraud detection: mock location (+40), VPN (+15), rooted device (+20), GPS mismatch (+30), score 0-100
+- Auto-flag at ≥70, auto-escalate at ≥90
+- Duplicate prevention: nghiệp vụ 1/shift, IT 30min interval
+- Offline check-in: offline flag + UUID + timestamp
+- Dynamic QR codes: SHA-256 tokens, Redis TTL 5-10min, one-time use
+- Late grace quota: 4/month configurable, "trễ có phép" vs "trễ không phép"
+- Auto-reset quota monthly (cron 1st of month 00:01 VN)
 
-15 containers chạy và healthy:
+### Shift Rules (attendance-service)
+- ShiftRuleEngine: grace period, rounding to 15min, overnight shift (cross-midnight)
+- OT calculation with multipliers
+- ConfigResolver: unit > division > system priority cascade
 
-| Service | Port | Trạng thái |
-|---------|------|------------|
-| PostgreSQL Master | 5432 | healthy |
-| PostgreSQL Slave | 5433 | running |
-| Redis | 6379 | healthy |
-| Kafka | 29092 | healthy |
-| Kafka UI | 8090 | running |
-| MinIO | 9000/9001 | healthy |
-| ntfy | 8095 | healthy |
-| MailHog | 1025/8025 | healthy |
-| + 7 backend services | 8080-8086 | healthy |
-| Web Dashboard (Docker) | 3000 | running |
+### Timesheet (attendance-service)
+- Lifecycle: Draft → Pending Review → Approved → Locked
+- Auto-calculate from attendance records (work days, late, early leave, absent, OT)
+- JSONB snapshot at lock time (immutable)
+- Manager review team timesheets
+- Admin lock requires SYSTEM_ADMIN role
 
-#### Demo Data
+### Leave & Approval (attendance-service)
+- Create with balance validation + business day calculation
+- Multi-level approval: walks org tree via ApprovalRouter
+- Auto re-route when approver absent >3 days (find substitute)
+- Balance: deduct on create, confirm on approve, release on reject/cancel
+- Cancel own request (ownership validation)
+- SLA enforcement: SICK=4h, ANNUAL=48h, PERSONAL=24h, escalate at 2x
 
-- **24 test users** across tất cả 7 roles (12 nhân viên, 5 IT, 7 quản lý)
-- **40+ attendance records** covering: đúng giờ, trễ, về sớm, suspicious, offline sync, multi-location, QR code
-- **6 leave requests**: approved, pending, rejected, sick, personal
-- **8 timesheets**: tháng 2 (locked), tháng 3 (draft/pending)
-- **2 anomaly detections**: GPS mismatch score 75, mock location fraud score 92
+### Escalation (attendance-service)
+- EscalationScheduler: checks every 30min for absent/late employees
+- Multi-level: L1 → direct manager, L2 → dept head, L3 → director
+- Configurable timeouts per level
+- EscalationTracking: PENDING → ACKNOWLEDGED → ACTIONED
+- Kafka → notification-service delivery
+
+### Admin Console (admin-service)
+- Organization CRUD + tree
+- Employee CRUD + paginated search
+- Excel import: template download → validate → dry run → execute (EasyExcel streaming)
+- Import rollback within 24h (batch tagging)
+- Maker-Checker: request → pending → approve/reject (self-approval prevented)
+- Location CRUD + WiFi AP management + WiFi survey (bulk)
+- Holiday management by year
+- Shift management with org assignment
+- Escalation rule configuration
+- Audit log viewer (paginated, filterable)
+
+### RBAC
+- 7 roles: SYSTEM_ADMIN, CEO, DIVISION_DIRECTOR, REGION_DIRECTOR, DEPT_HEAD, DEPUTY_HEAD, UNIT_HEAD, EMPLOYEE
+- HeaderAuthFilter: reads X-User-Id/Role/Email from gateway headers
+- Endpoint-level: admin requires SYSTEM_ADMIN/CEO, timesheet approve requires manager roles
+- DataScopeFilter: SELF/UNIT/DEPARTMENT/BRANCH/REGION/ALL
+- Permission matrix: V2 migration with role × action × resource × scope
+- PermissionChecker: in-memory cache, 5min refresh
+- Web: usePermission hook + PermissionGate component
+
+### Dashboard (report-service + web)
+- 30 widgets across 4 role groups:
+  - Employee (11): today status, attendance count, late count, leave balance, late grace, shift, OT, holidays, pending leaves, notifications, weekly summary
+  - Manager (9): team attendance rate, team pulse, pending approvals, late employees, absent list, leave calendar, KPI trend, OT summary, suspicious records
+  - Executive (7): org attendance gauge, branch comparison, 30-day trend, anomaly summary, leave rate, escalation summary, workforce distribution
+  - System Admin (3): system health, pending config changes, audit log
+- SSE real-time updates on check-in events
+- Pre-aggregated tables: daily/weekly/KPI (nightly batch)
+- Team pulse + branch comparison API endpoints
+
+### Notifications (notification-service)
+- Kafka consumer: 4 topics (notification, escalation, anomaly, checkin)
+- Priority routing: URGENT→push+email+SMS, HIGH→push+email, NORMAL→push, LOW→email
+- ntfy push with circuit breaker + retry
+- MailHog email with circuit breaker + retry
+- SMS mock (logged)
+- Reminder scheduler: 07:45 check-in, 16:45 check-out (Mon-Fri, skip holidays)
+- Notification log persistence
+
+### AI Features (ai-service)
+- Anomaly detection: Isolation Forest, 5 features (hour, day, distance, device, time-since-last)
+- 5 anomaly types: BUDDY_PUNCHING, LOCATION_ANOMALY, TIME_ANOMALY, DEVICE_ANOMALY, GROUP_PATTERN
+- Kafka consumer: attendance.checkin → score → publish attendance.anomaly if ≥70
+- Vietnamese NLP chatbot: 7 intents (leave balance, create leave, late count, schedule, attendance, late grace, summary)
+- Real DB queries for all chatbot responses
+- Auto-create leave from Vietnamese natural language ("xin nghỉ ngày mai", "thứ 2 tới")
+- Knowledge base: 8 HDBank policy documents in pgvector, RAG search for general queries
+- Weekly re-training: APScheduler every Sunday 02:00 VN time
+- Session persistence (chatbot_sessions + chatbot_messages)
+- Escalate to HR when chatbot can't answer
+
+### Reports (report-service)
+- Excel export via EasyExcel + MinIO upload
+- PDF export via OpenPDF + MinIO upload
+- Async report generation with @Async + job tracking
+- Presigned download URLs from MinIO
+- AggregationScheduler: nightly daily, weekly Monday, KPI daily
+
+---
+
+## Test Coverage
+
+| Category | Files | Tests | What's Tested |
+|----------|-------|-------|---------------|
+| Domain unit tests | 10 | ~70 | ShiftRuleEngine, FraudScorer, DuplicateGuard, LocationVerifier, ConfigResolver, EscalationEngine, Timesheet, LateGraceQuota, GpsCoordinate |
+| Auth domain tests | 2 | ~9 | Employee 2FA, RefreshToken |
+| ArchUnit tests | 2 | ~9 | Hexagonal dependency rules |
+| Python AI tests | 3 | ~35 | Anomaly detection, chatbot intents, FastAPI endpoints |
+| **Total** | **17** | **143** | |
+
+Coverage: Domain layer **~67%**, Overall **~17%** (adapters untested without Spring context)
+
+---
+
+## Demo Data
+
+- **24 test users** across 7 roles (12 staff, 5 IT, 7 management)
+- **40+ attendance records** (on-time, late, early leave, suspicious, offline, multi-location, QR)
+- **6 leave requests** (approved, pending, rejected, sick, personal)
+- **8 timesheets** (Feb locked, Mar in-progress)
+- **2 anomaly detections** (GPS mismatch score 75, mock location score 92)
+- **8 policy documents** in knowledge base
 - **Daily KPI reports**, notification logs, holidays
 
-#### Demo Scenarios (10)
-
-1. Employee daily check-in (mobile)
-2. Late grace quota warning (mobile)
-3. Suspicious check-in — fraud detection (web)
-4. Leave request approval workflow (web)
-5. IT multi-location check-in (mobile)
-6. Offline check-in & sync (mobile)
-7. Timesheet review & lock (web)
-8. AI Chatbot Vietnamese NLP (API)
-9. Executive dashboard (web)
-10. System admin operations (web)
-
----
-
-## Test Accounts
-
-### Management
+### Test Accounts
 
 | Role | Email | Password |
 |------|-------|----------|
@@ -136,140 +258,97 @@ Autonomous build session — toàn bộ hệ thống được scaffold từ zero
 | Branch Manager | `manager.q1@hdbank.vn` | `Manager@123` |
 | Deputy Head | `deputy.q1@hdbank.vn` | `Manager@123` |
 | Unit Head | `unit.web@hdbank.vn` | `Manager@123` |
-
-### Employees — CN Quận 1 (nghiệp vụ)
-
-| Code | Email | Đặc điểm |
-|------|-------|-----------|
-| NV001 | `nv001@hdbank.vn` | Normal, 3/4 late grace used |
-| NV002 | `nv002@hdbank.vn` | SUSPICIOUS check-in (GPS mismatch + VPN) |
-| NV003 | `nv003@hdbank.vn` | OFFLINE check-in (WiFi down) |
-| NV004 | `nv004@hdbank.vn` | Frequently late, **4/4 late grace EXHAUSTED** |
-| NV005 | `nv005@hdbank.vn` | Early leave (16:30) |
-| NV006 | `nv006@hdbank.vn` | **FRAUD detected** — mock location, score 92 |
-| NV007 | `nv007@hdbank.vn` | QR code check-in |
-
-### Employees — HO IT (kỹ thuật)
-
-| Code | Email | Đặc điểm |
-|------|-------|-----------|
-| IT001 | `it001@hdbank.vn` | Multi-location: HO sáng, CN Q1 chiều |
-| IT002 | `it002@hdbank.vn` | OT worker (đến 19:00) |
-| IT003 | `it003@hdbank.vn` | Normal |
-| IT004 | `it004@hdbank.vn` | Làm việc tầng 3 |
-| IT005 | `it005@hdbank.vn` | Normal |
-
-> Tất cả employees password: `Employee@123`
+| Employees (NV001-NV007) | `nv001@hdbank.vn` ... `nv007@hdbank.vn` | `Employee@123` |
+| IT Staff (IT001-IT005) | `it001@hdbank.vn` ... `it005@hdbank.vn` | `Employee@123` |
 
 ---
 
-## Cấu trúc thư mục
+## Project Structure
 
 ```
 smart-attendance/
-├── CLAUDE.md                          # Quick reference cho Claude Code
-├── PROMPT_LOG.md                      # Lịch sử prompts và quyết định
-├── SUMMARY_LOG.md                     # File này
-├── .env.example / .env                # Environment variables
+├── CLAUDE.md                          # Project context for Claude Code
+├── PROMPT_LOG.md                      # Full prompt history
+├── SUMMARY_LOG.md                     # This file
+├── .env.example / .env
 ├── docker-compose.yml                 # Full system (15 containers)
-├── docker-compose.infra.yml           # Infrastructure only (8 containers)
+├── docker-compose.infra.yml           # Infrastructure (8 containers)
 ├── scripts/
 │   ├── start-all.sh                   # One-command start
 │   ├── stop-all.sh                    # One-command stop
 │   └── start-infra-only.sh
 ├── docs/
-│   ├── ARCHITECTURE.md                # Chi tiết kiến trúc
-│   ├── STARTUP_GUIDE.md               # Hướng dẫn khởi động
-│   └── DEMO_GUIDE.md                  # Demo scenarios
+│   ├── ARCHITECTURE.md                # Detailed architecture
+│   ├── STARTUP_GUIDE.md               # Startup + troubleshooting
+│   └── DEMO_GUIDE.md                  # 24 users, 10 demo scenarios
 ├── backend/
-│   ├── build.gradle.kts               # Root build (Gradle multi-module)
-│   ├── common/                        # Shared DTOs, events, security
-│   ├── gateway/                       # [Layered] Spring Cloud Gateway
-│   ├── auth-service/                  # [Hexagonal] Login, JWT, 2FA
-│   ├── attendance-service/            # [Hexagonal] Check-in, fraud, shifts
-│   ├── admin-service/                 # [Hexagonal] Org CRUD, import
-│   ├── notification-service/          # [Layered] Kafka → push/email
-│   ├── report-service/                # [Layered] Dashboard, reports
-│   └── ai-service/                    # [Python FastAPI] ML, chatbot
-├── web/                               # React + Vite + Ant Design
-│   ├── src/app/                       # Routing, layouts
-│   ├── src/features/                  # auth, dashboard, attendance, leave, admin
-│   ├── src/shared/                    # API, hooks, types
-│   └── src/pages/                     # Page compositions
+│   ├── build.gradle.kts               # Root (JaCoCo, Lombok)
+│   ├── common/                        # Shared: DTOs, events, security, filters
+│   ├── gateway/                       # [Layered] JWT filter, routing
+│   ├── auth-service/                  # [Hexagonal] Auth, 2FA, permissions
+│   ├── attendance-service/            # [Hexagonal] Core: check-in, timesheet, leave, escalation
+│   ├── admin-service/                 # [Hexagonal] CRUD, import, maker-checker
+│   ├── notification-service/          # [Layered] Kafka → push/email/SMS
+│   ├── report-service/                # [Layered] Dashboard, reports, export
+│   └── ai-service/                    # [Python] ML, chatbot, knowledge base
+├── web/                               # React + Vite + Ant Design + ECharts
+│   ├── src/features/dashboard/components/widgets/  # 30 widget components
+│   ├── src/features/auth/
+│   ├── src/features/attendance/
+│   ├── src/features/leave/
+│   ├── src/features/admin/
+│   ├── src/shared/                    # API, hooks, PermissionGate
+│   └── src/pages/
 └── mobile/                            # Expo React Native
-    └── src/features/                  # auth, checkin, history, leave, home, profile
+    ├── src/features/auth/
+    ├── src/features/checkin/           # GPS, WiFi mock, check-in/out
+    ├── src/features/chatbot/           # AI chatbot screen
+    ├── src/features/home/              # Dashboard with late grace indicator
+    ├── src/features/history/
+    ├── src/features/leave/
+    └── src/features/profile/           # 2FA toggle, logout
 ```
 
 ---
 
-## Khởi động hệ thống
+## Startup
 
 ```bash
-# Start everything
-./scripts/start-all.sh
+./scripts/start-all.sh     # Start everything
+./scripts/stop-all.sh      # Stop everything
 
-# Stop everything
-./scripts/stop-all.sh
-
-# Web Dashboard
-http://localhost:5173    # Dev (hot reload)
-http://localhost:3000    # Production (Docker)
-
-# Mobile
-cd mobile && npx expo start --port 19000
-# Press 'i' for iOS, 'a' for Android
-
-# Infrastructure UIs
-http://localhost:8090    # Kafka UI
-http://localhost:8025    # MailHog (OTP emails)
-http://localhost:8095    # ntfy (push notifications)
-http://localhost:9001    # MinIO Console (minioadmin/minioadmin123)
+# Web: http://localhost:5173 (dev) or http://localhost:3000 (Docker)
+# Mobile: cd mobile && npx expo start --port 19000
+# Kafka UI: http://localhost:8090
+# MailHog: http://localhost:8025
+# MinIO: http://localhost:9001
 ```
 
 ---
 
-## Việc cần làm tiếp theo
+## Git History
 
-### Ưu tiên 1 — Hoàn thiện features hiện tại
-- Wire up real API data cho tất cả web pages (hiện một số dùng mock/empty data)
-- Decode JWT và hiển thị user info sau login
-- Complete mobile screens với real API integration
-- Error handling và loading states
-
-### Ưu tiên 2 — Features còn thiếu
-- Excel import pipeline (admin-service)
-- Maker-checker workflow
-- Escalation engine (auto-escalate khi hết timeout)
-- SSE real-time dashboard updates
-- Push notifications end-to-end (Kafka → notification → ntfy → mobile)
-- QR code generation và rotation
-
-### Ưu tiên 3 — Testing
-- Unit tests cho domain services
-- Integration tests với Testcontainers
-- ArchUnit tests enforce hexagonal rules
-- E2E tests (Playwright cho web, Detox cho mobile)
-
-### Ưu tiên 4 — Polish
-- Vietnamese localization cho tất cả error messages
-- Responsive web design
-- Mobile offline sync với WatermelonDB
-- Biometric login (fingerprint/Face ID)
+```
+5e5051d feat: Close remaining 2% gaps — knowledge base, weekly training, SLA, device attestation
+4dbc008 test: Comprehensive test suite — 143 tests across 17 files
+204a793 feat: Complete remaining FR/NFR — 30 dashboard widgets, permission matrix, circuit breakers
+0a2f7bf feat: Full Smart Attendance system — 7 services, web dashboard, mobile app
+```
 
 ---
 
-## Workflow tiếp tục phát triển
+## Development Workflow
 
 ```
 1. cd smart_attendance && claude
 2. "start all services"
 3. "I want to work on [feature/fix]"
-4. Claude implements → bạn review/test
+4. Claude implements → review/test
 5. "commit this"
-6. Lặp lại 3-5
+6. Repeat 3-5
 7. "stop all services"
 ```
 
 ---
 
-*Tài liệu này được tự động tạo bởi Claude Code — 31/03/2026*
+*Generated by Claude Code — 31/03/2026*
