@@ -47,7 +47,10 @@
       "Bash(grep -E \"\\\\.env$|credentials|secret\")",
       "Bash(git commit:*)",
       "Bash(git remote:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(find . -path */test/* -name *.java -o -path */test/* -name *.py -o -path */__tests__/* -name *.ts -o -path */__tests__/* -name *.tsx)",
+      "Bash(find . -path */test/* -name *.java -not -path */node_modules/*)",
+      "Bash(grep -r @Test backend/*/src/test/)"
     ]
   }
 }

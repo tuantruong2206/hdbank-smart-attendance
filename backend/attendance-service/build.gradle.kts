@@ -29,6 +29,7 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.testcontainers:junit-jupiter:1.20.1")
     testImplementation("org.testcontainers:postgresql:1.20.1")
+    testImplementation("com.tngtech.archunit:archunit-junit5:1.3.0")
 }
 
 tasks.withType<JavaCompile> {
