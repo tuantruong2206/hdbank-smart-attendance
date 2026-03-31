@@ -52,7 +52,8 @@
       "Bash(find . -path */test/* -name *.java -not -path */node_modules/*)",
       "Bash(grep -r @Test backend/*/src/test/)",
       "Bash(java --version)",
-      "Bash(/usr/libexec/java_home -V 2>&1)"
+      "Bash(/usr/libexec/java_home -V 2>&1)",
+      "Bash(npm install:*)"
     ]
   }
 }

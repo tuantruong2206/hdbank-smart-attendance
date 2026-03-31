@@ -42,6 +42,29 @@
 
 ## Demo Scenarios
 
+### Mobile App Setup (Before Running Mobile Scenarios)
+
+**Emulator (iOS/Android)**:
+```bash
+cd mobile && npm install --legacy-peer-deps && npx expo start --port 19000
+# Press 'i' for iOS Simulator or 'a' for Android Emulator
+```
+
+**Physical Device (iPhone/Android)**:
+1. Install **Expo Go** from App Store / Play Store
+2. Phone and Mac must be on **same WiFi network**
+3. Find Mac's IP: `ipconfig getifaddr en0` (current: `10.8.48.247`)
+4. The API URL is configured in `mobile/src/shared/api/axiosInstance.ts` — update the IP if yours differs
+5. Verify gateway is reachable: `curl http://YOUR_MAC_IP:8080/actuator/health`
+6. Start Expo and scan QR code:
+   ```bash
+   cd mobile && npx expo start --port 19000
+   ```
+
+> **If login fails on physical device**: check that the IP in `axiosInstance.ts` matches your Mac's current IP. Run `ipconfig getifaddr en0` to verify.
+
+---
+
 ### Scenario 1: Employee Daily Check-in (Mobile App)
 
 **Login as**: `nv001@hdbank.vn` / `Employee@123`

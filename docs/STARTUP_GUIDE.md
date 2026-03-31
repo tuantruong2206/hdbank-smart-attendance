@@ -103,7 +103,7 @@ npm run dev
 
 ```bash
 cd mobile
-npm install          # Only first time
+npm install --legacy-peer-deps    # Only first time
 npx expo start --port 19000
 ```
 
@@ -114,9 +114,41 @@ Then in the Expo terminal:
 - Press **`a`** → open on **Android Emulator** (requires Android Studio + running emulator)
 - Scan **QR code** → open on **physical device** via Expo Go app (no IDE needed)
 
-> **API connection**: iOS Simulator and Expo Go on same WiFi use `localhost:8080`. Android Emulator uses `10.0.2.2:8080` — this is handled automatically in `src/shared/api/axiosInstance.ts`.
+#### API Connection by Platform
+
+| Platform | API URL | How It Works |
+|----------|---------|-------------|
+| iOS Simulator | `localhost:8080` | Shares Mac's network |
+| Android Emulator | `10.0.2.2:8080` | Special alias for host machine |
+| **Physical Device (Expo Go)** | `{Mac LAN IP}:8080` | Must be on same WiFi |
+
+The app auto-detects physical device vs emulator in `src/shared/api/axiosInstance.ts`.
+
+#### Physical Device Setup
+
+1. Install **Expo Go** from App Store (iPhone) or Play Store (Android)
+2. Ensure phone and Mac are on the **same WiFi network**
+3. Find your Mac's LAN IP:
+   ```bash
+   ipconfig getifaddr en0
+   ```
+4. The current configured IP is `10.8.48.247` in `mobile/src/shared/api/axiosInstance.ts`. If your IP is different, update it:
+   ```typescript
+   // In mobile/src/shared/api/axiosInstance.ts, find this line and update the IP:
+   return 'http://YOUR_MAC_IP:8080/api/v1';
+   ```
+5. Verify gateway is reachable from the LAN IP:
+   ```bash
+   curl http://YOUR_MAC_IP:8080/actuator/health
+   ```
+6. Start Expo and scan QR code:
+   ```bash
+   cd mobile && npx expo start --port 19000
+   ```
+
+> **If login fails on physical device**: the most common cause is the API URL using `localhost` instead of your Mac's LAN IP. Check `axiosInstance.ts`.
 >
-> **If Expo Go on physical device can't reach API**: your phone must be on the same WiFi as your Mac. Replace `localhost` with your Mac's local IP (e.g. `192.168.1.x`) in `axiosInstance.ts`.
+> **If IP changes** (different WiFi network): update the IP in `axiosInstance.ts` and restart Expo with `--clear` flag.
 
 ---
 
@@ -237,10 +269,13 @@ docker compose -f docker-compose.infra.yml down -v
 | **PostgreSQL slave not syncing** | `docker compose -f docker-compose.infra.yml restart postgres-slave` |
 | **Backend Docker build fails** | Check error with `docker compose build <service-name> 2>&1 \| tail -30`. Common cause: missing dependency in `build.gradle.kts` |
 | **Web `npm install` fails** | Delete `web/node_modules` and `web/package-lock.json`, retry |
-| **Mobile can't connect to API** | Android emulator: `10.0.2.2:8080`. iOS simulator: `localhost:8080`. Physical device: `adb reverse tcp:8080 tcp:8080` |
+| **Mobile can't connect to API** | Android emulator: `10.0.2.2:8080`. iOS simulator: `localhost:8080`. Physical device: must use Mac's LAN IP |
+| **Physical device login fails** | Most common cause: API URL uses `localhost` instead of Mac's LAN IP. Run `ipconfig getifaddr en0` to find IP, then update `mobile/src/shared/api/axiosInstance.ts`. Verify with: `curl http://YOUR_IP:8080/actuator/health` |
+| **Physical device — app loads but API errors** | 1) Check phone and Mac on same WiFi. 2) Check Mac's IP hasn't changed. 3) Try: `curl http://YOUR_IP:8080/actuator/health` from another device |
 | **Expo "Port 8081 in use"** | Auth-service uses 8081. Always start Expo with `--port 19000` |
 | **Expo `xcrun simctl` error** | Run `xcode-select --install` or open Xcode once to accept license |
-| **Expo Go can't reach API** | Phone must be on same WiFi as Mac. Use Mac's local IP instead of `localhost` in `axiosInstance.ts` |
+| **Expo Go can't reach API** | Phone must be on same WiFi as Mac. Update IP in `mobile/src/shared/api/axiosInstance.ts` and restart Expo with `--clear` |
+| **Expo `expo-location` plugin error** | Run `cd mobile && npm install --legacy-peer-deps` to install missing native modules |
 | **Android emulator can't connect** | API uses `10.0.2.2:8080` (maps to host `localhost`). Check gateway is running: `curl localhost:8080/actuator/health` |
 | **"image platform mismatch" warning** | Safe to ignore on Apple Silicon — Docker runs amd64 images via Rosetta emulation |
 | **Services start but API returns 502** | Backend services may still be initializing. Wait 30s and retry. Check logs: `docker compose logs <service-name> --tail 20` |

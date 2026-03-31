@@ -2,10 +2,28 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { Platform } from 'react-native';
 import { useAuth } from '../hooks/useAuth';
 
-const baseURL =
-  Platform.OS === 'android'
+// For physical device: use your Mac's local IP (same WiFi network required)
+// For emulator: Android uses 10.0.2.2, iOS Simulator uses localhost
+import Constants from 'expo-constants';
+
+const getBaseURL = () => {
+  // Physical device (Expo Go) — use LAN IP
+  if (!__DEV__) return 'http://10.8.48.247:8080/api/v1';
+
+  const isDevice = Constants.executionEnvironment === 'storeClient' ||
+    (Constants.expoConfig?.hostUri && !Constants.expoConfig.hostUri.includes('localhost'));
+
+  if (isDevice || Platform.OS === 'web') {
+    // Physical device via Expo Go — use Mac's LAN IP
+    return 'http://10.8.48.247:8080/api/v1';
+  }
+  // Emulator
+  return Platform.OS === 'android'
     ? 'http://10.0.2.2:8080/api/v1'
     : 'http://localhost:8080/api/v1';
+};
+
+const baseURL = getBaseURL();
 
 const api = axios.create({ baseURL, timeout: 15_000 });
 
