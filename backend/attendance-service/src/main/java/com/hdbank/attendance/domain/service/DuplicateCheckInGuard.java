@@ -5,6 +5,8 @@ import com.hdbank.attendance.domain.model.AttendanceRecord;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -26,11 +28,11 @@ public class DuplicateCheckInGuard {
         AttendanceRecord last = lastRecord.get();
 
         if ("NGHIEP_VU".equals(employeeType)) {
-            // Max 1 check-in per shift
-            if (last.getShiftId() != null && last.getShiftId().equals(shiftId)
-                    && last.getCheckType() == AttendanceRecord.CheckType.CHECK_IN) {
+            // Max 1 CHECK_IN per day for nghiệp vụ employees
+            if (last.getCheckType() == AttendanceRecord.CheckType.CHECK_IN
+                    && isSameDay(last.getCheckTime(), checkTime)) {
                 throw new DuplicateCheckInException(
-                        "Nhân viên nghiệp vụ chỉ được chấm công 1 lần/ca");
+                        "Nhân viên nghiệp vụ chỉ được chấm công vào 1 lần/ca. Bạn đã chấm công vào hôm nay.");
             }
         } else {
             // IT: configurable interval (default 30 min)
@@ -41,5 +43,13 @@ public class DuplicateCheckInGuard {
                                 IT_MIN_INTERVAL.toMinutes() + " phút giữa các lần chấm công");
             }
         }
+    }
+
+    private static final ZoneId VN_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
+
+    private boolean isSameDay(Instant a, Instant b) {
+        LocalDate dayA = a.atZone(VN_ZONE).toLocalDate();
+        LocalDate dayB = b.atZone(VN_ZONE).toLocalDate();
+        return dayA.equals(dayB);
     }
 }

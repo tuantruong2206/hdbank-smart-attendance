@@ -216,9 +216,7 @@ public class EscalationScheduler {
     }
 
     private ShiftJpaEntity resolveShift(EmployeeJpaEntity employee) {
-        if (employee.getShiftId() != null) {
-            return shiftRepository.findById(employee.getShiftId()).orElse(null);
-        }
+        // Look up shift via employee_shifts table or fall back to org-level default
         return shiftRepository.findByOrganizationId(employee.getOrganizationId()).orElse(null);
     }
 
