@@ -56,6 +56,20 @@ public class AuthService implements LoginUseCase, VerifyTwoFactorUseCase, Refres
             throw new InvalidCredentialsException();
         }
 
+        // Device attestation: detect device change and log audit event
+        if (command.deviceId() != null && employee.getDeviceId() != null
+                && !command.deviceId().equals(employee.getDeviceId())) {
+            eventPublisher.publish("attendance.audit", AuditEvent.builder()
+                    .userId(employee.getId())
+                    .userEmail(employee.getEmail())
+                    .action("DEVICE_CHANGED")
+                    .resource("auth")
+                    .oldValue(employee.getDeviceId())
+                    .newValue(command.deviceId())
+                    .ipAddress(command.ipAddress())
+                    .build());
+        }
+
         if (employee.isTwoFactorEnabled()) {
             String partialToken = tokenProvider.generatePartialToken(employee);
             return new LoginResult(null, true, partialToken, employee.getId());

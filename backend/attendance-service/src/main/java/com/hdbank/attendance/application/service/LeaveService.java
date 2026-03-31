@@ -122,10 +122,11 @@ public class LeaveService implements LeaveRequestUseCase {
 
         // If fully approved, confirm the balance deduction
         if (request.getStatus() == LeaveStatus.APPROVED) {
+            final int totalDaysApproved = request.getTotalDays();
             leaveBalanceRepository.findByEmployeeAndYearAndType(
                     request.getEmployeeId(), request.getStartDate().getYear(), request.getLeaveType()
             ).ifPresent(balance -> {
-                balance.confirmUsed(request.getTotalDays());
+                balance.confirmUsed(totalDaysApproved);
                 leaveBalanceRepository.save(balance);
             });
 
@@ -154,10 +155,11 @@ public class LeaveService implements LeaveRequestUseCase {
         request.reject(approverId, comment, reason);
 
         // Release the pending balance
+        final int totalDaysRejected = request.getTotalDays();
         leaveBalanceRepository.findByEmployeeAndYearAndType(
                 request.getEmployeeId(), request.getStartDate().getYear(), request.getLeaveType()
         ).ifPresent(balance -> {
-            balance.releasePending(request.getTotalDays());
+            balance.releasePending(totalDaysRejected);
             leaveBalanceRepository.save(balance);
         });
 
@@ -183,10 +185,11 @@ public class LeaveService implements LeaveRequestUseCase {
         request.cancel(employeeId);
 
         // Release the pending balance
+        final int totalDaysCancelled = request.getTotalDays();
         leaveBalanceRepository.findByEmployeeAndYearAndType(
                 request.getEmployeeId(), request.getStartDate().getYear(), request.getLeaveType()
         ).ifPresent(balance -> {
-            balance.releasePending(request.getTotalDays());
+            balance.releasePending(totalDaysCancelled);
             leaveBalanceRepository.save(balance);
         });
 

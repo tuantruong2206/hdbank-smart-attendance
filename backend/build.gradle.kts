@@ -15,6 +15,7 @@ allprojects {
 
 subprojects {
     apply(plugin = "java")
+    apply(plugin = "jacoco")
 
     java {
         sourceCompatibility = JavaVersion.VERSION_21
@@ -35,5 +36,14 @@ subprojects {
 
     tasks.withType<Test> {
         useJUnitPlatform()
+        finalizedBy(tasks.named("jacocoTestReport"))
+    }
+
+    tasks.withType<JacocoReport> {
+        reports {
+            xml.required.set(true)
+            html.required.set(true)
+            csv.required.set(true)
+        }
     }
 }

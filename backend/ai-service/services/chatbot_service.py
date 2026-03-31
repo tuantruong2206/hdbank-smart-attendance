@@ -273,6 +273,18 @@ class ChatbotService:
         if intent == "CREATE_LEAVE":
             return self._handle_create_leave(employee_id, message)
 
+        # GENERAL_QUERY — try knowledge base RAG search
+        try:
+            from services.knowledge_base import search_policies
+            results = search_policies(message, top_k=2)
+            if results and results[0].get("similarity", 0) > 0.3:
+                answer_parts = []
+                for r in results:
+                    answer_parts.append(f"**{r['title']}**: {r['content']}")
+                return "Theo quy định nội bộ:\n\n" + "\n\n".join(answer_parts)
+        except Exception:
+            logger.debug("Knowledge base search unavailable")
+
         return (
             "Xin lỗi, tôi chưa hiểu câu hỏi của bạn. "
             "Bạn có thể hỏi về: nghỉ phép, chấm công, lịch làm việc, số lần đi trễ, "

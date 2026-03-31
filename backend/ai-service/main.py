@@ -34,8 +34,21 @@ async def lifespan(app: FastAPI):
         _kafka_consumer = KafkaConsumerPipeline(detector)
         _kafka_consumer.start()
         logger.info("Kafka consumer pipeline started")
+
+        # Start weekly re-training scheduler
+        from services.weekly_trainer import start_weekly_training
+        start_weekly_training(detector)
+
     except Exception:
         logger.exception("Failed to start Kafka consumer — running without it")
+
+    # Load knowledge base policies
+    try:
+        from services.knowledge_base import load_default_policies
+        loaded = load_default_policies()
+        logger.info("Knowledge base: %d policy documents loaded", loaded)
+    except Exception:
+        logger.exception("Failed to load knowledge base — chatbot will work without RAG")
 
     yield
 
@@ -43,6 +56,11 @@ async def lifespan(app: FastAPI):
     if _kafka_consumer:
         logger.info("Stopping Kafka consumer pipeline...")
         _kafka_consumer.stop()
+    try:
+        from services.weekly_trainer import stop_weekly_training
+        stop_weekly_training()
+    except Exception:
+        pass
     logger.info("AI Service shutting down")
 
 
