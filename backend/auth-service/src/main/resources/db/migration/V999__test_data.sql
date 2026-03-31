@@ -1,0 +1,78 @@
+-- Test data for local development
+
+-- Organizations
+INSERT INTO organizations (id, name, code, type, parent_id, level, path, is_active) VALUES
+('a0000000-0000-0000-0000-000000000001', 'Hội Sở HDBank', 'HO', 'HO', NULL, 0, '/HO', true),
+('a0000000-0000-0000-0000-000000000002', 'Khối Công Nghệ Thông Tin', 'KHOI-CNTT', 'KHOI', 'a0000000-0000-0000-0000-000000000001', 1, '/HO/KHOI-CNTT', true),
+('a0000000-0000-0000-0000-000000000003', 'Phòng Phát Triển Phần Mềm', 'PB-PTPM', 'PHONG_BAN', 'a0000000-0000-0000-0000-000000000002', 2, '/HO/KHOI-CNTT/PB-PTPM', true),
+('a0000000-0000-0000-0000-000000000004', 'Bộ phận Web', 'BP-WEB', 'BO_PHAN', 'a0000000-0000-0000-0000-000000000003', 3, '/HO/KHOI-CNTT/PB-PTPM/BP-WEB', true),
+('a0000000-0000-0000-0000-000000000005', 'Vùng Hồ Chí Minh', 'VUNG-HCM', 'VUNG', NULL, 0, '/VUNG-HCM', true),
+('a0000000-0000-0000-0000-000000000006', 'Chi nhánh Quận 1', 'CN-Q1', 'CHI_NHANH', 'a0000000-0000-0000-0000-000000000005', 1, '/VUNG-HCM/CN-Q1', true),
+('a0000000-0000-0000-0000-000000000007', 'Phòng Giao dịch', 'PGD-Q1', 'PHONG', 'a0000000-0000-0000-0000-000000000006', 2, '/VUNG-HCM/CN-Q1/PGD-Q1', true);
+
+-- Locations
+INSERT INTO locations (id, organization_id, name, address, building, floor, gps_latitude, gps_longitude, geofence_radius_meters) VALUES
+('b0000000-0000-0000-0000-000000000001', 'a0000000-0000-0000-0000-000000000001', 'Tòa nhà Hội Sở - Tầng 1', '25 Nguyễn Thị Minh Khai, Q1', 'Tòa nhà HO', 1, 10.7769, 106.7009, 200),
+('b0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000001', 'Tòa nhà Hội Sở - Tầng 2', '25 Nguyễn Thị Minh Khai, Q1', 'Tòa nhà HO', 2, 10.7769, 106.7009, 200),
+('b0000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000001', 'Tòa nhà Hội Sở - Tầng 3', '25 Nguyễn Thị Minh Khai, Q1', 'Tòa nhà HO', 3, 10.7769, 106.7009, 200),
+('b0000000-0000-0000-0000-000000000004', 'a0000000-0000-0000-0000-000000000006', 'Chi nhánh Quận 1', '100 Lê Lợi, Q1', 'CN Quận 1', 1, 10.7731, 106.7030, 150);
+
+-- WiFi Access Points
+INSERT INTO wifi_access_points (id, location_id, bssid, ssid, floor, signal_zone) VALUES
+('c0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', 'AA:BB:CC:DD:EE:01', 'HDBank-HO-F1', 1, 'STRONG'),
+('c0000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000002', 'AA:BB:CC:DD:EE:02', 'HDBank-HO-F2', 2, 'STRONG'),
+('c0000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000003', 'AA:BB:CC:DD:EE:03', 'HDBank-HO-F3', 3, 'STRONG'),
+('c0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:04', 'HDBank-CNQ1', 1, 'STRONG'),
+('c0000000-0000-0000-0000-000000000005', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:05', 'HDBank-CNQ1-2', 1, 'MEDIUM');
+
+-- Shifts
+INSERT INTO shifts (id, name, code, start_time, end_time, is_overnight, grace_period_minutes, early_departure_minutes, ot_multiplier) VALUES
+('d0000000-0000-0000-0000-000000000001', 'Ca sáng (Standard)', 'STD', '08:00', '17:00', false, 15, 15, 1.50),
+('d0000000-0000-0000-0000-000000000002', 'Ca chiều', 'AFT', '13:00', '21:00', false, 15, 15, 1.50),
+('d0000000-0000-0000-0000-000000000003', 'Ca đêm', 'NGT', '21:00', '05:00', true, 15, 15, 2.00);
+
+-- Late Grace Config (system-wide)
+INSERT INTO late_grace_config (organization_id, max_allowed_per_month, is_active) VALUES
+(NULL, 4, true);
+
+-- Employees (passwords are BCrypt hashed)
+INSERT INTO employees (id, employee_code, email, password_hash, full_name, phone, organization_id, primary_location_id, employee_type, role) VALUES
+('e0000000-0000-0000-0000-000000000001', 'ADMIN001', 'admin@hdbank.vn', '$2b$10$7aI61VIj4cCdc1qjnDsEsOvpTx/KttITsuEoj4PxouVAvr9BjTNMO', 'Nguyễn Văn Admin', '0901000001', 'a0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', 'IT_KY_THUAT', 'SYSTEM_ADMIN'),
+('e0000000-0000-0000-0000-000000000002', 'MGR001', 'manager.q1@hdbank.vn', '$2b$10$ItqFJ4A7zfpZDQ16dnNtU.rn5p7WJEgjdyekQk5oeJXDxpBWPYidm', 'Trần Thị Manager', '0901000002', 'a0000000-0000-0000-0000-000000000006', 'b0000000-0000-0000-0000-000000000004', 'NGHIEP_VU', 'DEPT_HEAD'),
+('e0000000-0000-0000-0000-000000000003', 'NV001', 'nv001@hdbank.vn', '$2b$10$272SOTF0XTn1wnd7EGr3hOWYcXXrRqMEac3kxXhP96L4qANVIN352', 'Lê Văn Nhân Viên', '0901000003', 'a0000000-0000-0000-0000-000000000007', 'b0000000-0000-0000-0000-000000000004', 'NGHIEP_VU', 'EMPLOYEE'),
+('e0000000-0000-0000-0000-000000000004', 'IT001', 'it001@hdbank.vn', '$2b$10$272SOTF0XTn1wnd7EGr3hOWYcXXrRqMEac3kxXhP96L4qANVIN352', 'Phạm Minh IT', '0901000004', 'a0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000002', 'IT_KY_THUAT', 'EMPLOYEE');
+
+-- Employee Shift Assignments
+INSERT INTO employee_shifts (employee_id, shift_id, effective_from) VALUES
+('e0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000001', '2026-01-01'),
+('e0000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000001', '2026-01-01'),
+('e0000000-0000-0000-0000-000000000003', 'd0000000-0000-0000-0000-000000000001', '2026-01-01'),
+('e0000000-0000-0000-0000-000000000004', 'd0000000-0000-0000-0000-000000000001', '2026-01-01');
+
+-- Leave Balances
+INSERT INTO leave_balances (employee_id, leave_type, year, total_days, used_days) VALUES
+('e0000000-0000-0000-0000-000000000001', 'ANNUAL', 2026, 15.00, 2.00),
+('e0000000-0000-0000-0000-000000000002', 'ANNUAL', 2026, 15.00, 3.00),
+('e0000000-0000-0000-0000-000000000003', 'ANNUAL', 2026, 12.00, 1.00),
+('e0000000-0000-0000-0000-000000000004', 'ANNUAL', 2026, 12.00, 0.00);
+
+-- Late Grace Quota (March 2026)
+INSERT INTO late_grace_quota (employee_id, month, year, max_allowed, used_count) VALUES
+('e0000000-0000-0000-0000-000000000001', 3, 2026, 4, 1),
+('e0000000-0000-0000-0000-000000000002', 3, 2026, 4, 0),
+('e0000000-0000-0000-0000-000000000003', 3, 2026, 4, 3),
+('e0000000-0000-0000-0000-000000000004', 3, 2026, 4, 2);
+
+-- Sample Attendance Records (March 2026)
+INSERT INTO attendance_records (employee_id, employee_code, check_type, check_time, location_id, wifi_bssid, wifi_ssid, verification_method, status, fraud_score) VALUES
+('e0000000-0000-0000-0000-000000000003', 'NV001', 'CHECK_IN', '2026-03-28 07:55:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:04', 'HDBank-CNQ1', 'WIFI', 'VALID', 5),
+('e0000000-0000-0000-0000-000000000003', 'NV001', 'CHECK_OUT', '2026-03-28 17:05:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:04', 'HDBank-CNQ1', 'WIFI', 'VALID', 3),
+('e0000000-0000-0000-0000-000000000004', 'IT001', 'CHECK_IN', '2026-03-28 08:10:00+07', 'b0000000-0000-0000-0000-000000000002', 'AA:BB:CC:DD:EE:02', 'HDBank-HO-F2', 'WIFI', 'VALID', 8),
+('e0000000-0000-0000-0000-000000000004', 'IT001', 'CHECK_OUT', '2026-03-28 17:30:00+07', 'b0000000-0000-0000-0000-000000000002', 'AA:BB:CC:DD:EE:02', 'HDBank-HO-F2', 'WIFI', 'VALID', 2);
+
+-- Holidays
+INSERT INTO holidays (name, date, year, is_recurring) VALUES
+('Giỗ Tổ Hùng Vương', '2026-04-12', 2026, true),
+('Ngày Giải phóng miền Nam', '2026-04-30', 2026, true),
+('Ngày Quốc tế Lao động', '2026-05-01', 2026, true),
+('Quốc khánh', '2026-09-02', 2026, true);

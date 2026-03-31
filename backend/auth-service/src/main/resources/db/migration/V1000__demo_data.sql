@@ -1,0 +1,246 @@
+-- ============================================================
+-- DEMO DATA — Rich dataset for all use case scenarios
+-- ============================================================
+
+-- ========================
+-- ADDITIONAL EMPLOYEES (20 employees across roles)
+-- ========================
+-- Password for all: Employee@123 → $2b$10$272SOTF0XTn1wnd7EGr3hOWYcXXrRqMEac3kxXhP96L4qANVIN352
+-- CEO password: Admin@123 → $2b$10$7aI61VIj4cCdc1qjnDsEsOvpTx/KttITsuEoj4PxouVAvr9BjTNMO
+-- Manager password: Manager@123 → $2b$10$ItqFJ4A7zfpZDQ16dnNtU.rn5p7WJEgjdyekQk5oeJXDxpBWPYidm
+
+-- CEO
+INSERT INTO employees (id, employee_code, email, password_hash, full_name, phone, organization_id, primary_location_id, employee_type, role) VALUES
+('e0000000-0000-0000-0000-000000000010', 'CEO001', 'ceo@hdbank.vn', '$2b$10$7aI61VIj4cCdc1qjnDsEsOvpTx/KttITsuEoj4PxouVAvr9BjTNMO', 'Nguyễn Đức CEO', '0901000010', 'a0000000-0000-0000-0000-000000000001', 'b0000000-0000-0000-0000-000000000001', 'NGHIEP_VU', 'CEO');
+
+-- Division Director (Khối trưởng CNTT)
+INSERT INTO employees (id, employee_code, email, password_hash, full_name, phone, organization_id, primary_location_id, employee_type, role) VALUES
+('e0000000-0000-0000-0000-000000000011', 'DIR001', 'director.cntt@hdbank.vn', '$2b$10$ItqFJ4A7zfpZDQ16dnNtU.rn5p7WJEgjdyekQk5oeJXDxpBWPYidm', 'Trương Minh Director', '0901000011', 'a0000000-0000-0000-0000-000000000002', 'b0000000-0000-0000-0000-000000000002', 'IT_KY_THUAT', 'DIVISION_DIRECTOR');
+
+-- Region Director (Giám đốc Vùng HCM)
+INSERT INTO employees (id, employee_code, email, password_hash, full_name, phone, organization_id, primary_location_id, employee_type, role) VALUES
+('e0000000-0000-0000-0000-000000000012', 'RGD001', 'region.hcm@hdbank.vn', '$2b$10$ItqFJ4A7zfpZDQ16dnNtU.rn5p7WJEgjdyekQk5oeJXDxpBWPYidm', 'Hoàng Thị Region Director', '0901000012', 'a0000000-0000-0000-0000-000000000005', 'b0000000-0000-0000-0000-000000000004', 'NGHIEP_VU', 'REGION_DIRECTOR');
+
+-- Deputy Head (Phó phòng Giao dịch Q1)
+INSERT INTO employees (id, employee_code, email, password_hash, full_name, phone, organization_id, primary_location_id, employee_type, role) VALUES
+('e0000000-0000-0000-0000-000000000013', 'DPH001', 'deputy.q1@hdbank.vn', '$2b$10$ItqFJ4A7zfpZDQ16dnNtU.rn5p7WJEgjdyekQk5oeJXDxpBWPYidm', 'Võ Văn Deputy', '0901000013', 'a0000000-0000-0000-0000-000000000007', 'b0000000-0000-0000-0000-000000000004', 'NGHIEP_VU', 'DEPUTY_HEAD');
+
+-- Unit Head (Trưởng bộ phận Web)
+INSERT INTO employees (id, employee_code, email, password_hash, full_name, phone, organization_id, primary_location_id, employee_type, role) VALUES
+('e0000000-0000-0000-0000-000000000014', 'UNH001', 'unit.web@hdbank.vn', '$2b$10$ItqFJ4A7zfpZDQ16dnNtU.rn5p7WJEgjdyekQk5oeJXDxpBWPYidm', 'Đặng Quang Unit Head', '0901000014', 'a0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000002', 'IT_KY_THUAT', 'UNIT_HEAD');
+
+-- ============ EMPLOYEES — CN Quận 1 (nghiệp vụ, teller/giao dịch viên) ============
+INSERT INTO employees (id, employee_code, email, password_hash, full_name, phone, organization_id, primary_location_id, employee_type, role) VALUES
+('e0000000-0000-0000-0000-000000000020', 'NV002', 'nv002@hdbank.vn', '$2b$10$272SOTF0XTn1wnd7EGr3hOWYcXXrRqMEac3kxXhP96L4qANVIN352', 'Phan Thị Hoa', '0901000020', 'a0000000-0000-0000-0000-000000000007', 'b0000000-0000-0000-0000-000000000004', 'NGHIEP_VU', 'EMPLOYEE'),
+('e0000000-0000-0000-0000-000000000021', 'NV003', 'nv003@hdbank.vn', '$2b$10$272SOTF0XTn1wnd7EGr3hOWYcXXrRqMEac3kxXhP96L4qANVIN352', 'Ngô Thanh Tùng', '0901000021', 'a0000000-0000-0000-0000-000000000007', 'b0000000-0000-0000-0000-000000000004', 'NGHIEP_VU', 'EMPLOYEE'),
+('e0000000-0000-0000-0000-000000000022', 'NV004', 'nv004@hdbank.vn', '$2b$10$272SOTF0XTn1wnd7EGr3hOWYcXXrRqMEac3kxXhP96L4qANVIN352', 'Trần Minh Đức', '0901000022', 'a0000000-0000-0000-0000-000000000007', 'b0000000-0000-0000-0000-000000000004', 'NGHIEP_VU', 'EMPLOYEE'),
+('e0000000-0000-0000-0000-000000000023', 'NV005', 'nv005@hdbank.vn', '$2b$10$272SOTF0XTn1wnd7EGr3hOWYcXXrRqMEac3kxXhP96L4qANVIN352', 'Lý Thị Mai', '0901000023', 'a0000000-0000-0000-0000-000000000007', 'b0000000-0000-0000-0000-000000000004', 'NGHIEP_VU', 'EMPLOYEE'),
+('e0000000-0000-0000-0000-000000000024', 'NV006', 'nv006@hdbank.vn', '$2b$10$272SOTF0XTn1wnd7EGr3hOWYcXXrRqMEac3kxXhP96L4qANVIN352', 'Huỳnh Văn Bảo', '0901000024', 'a0000000-0000-0000-0000-000000000007', 'b0000000-0000-0000-0000-000000000004', 'NGHIEP_VU', 'EMPLOYEE'),
+('e0000000-0000-0000-0000-000000000025', 'NV007', 'nv007@hdbank.vn', '$2b$10$272SOTF0XTn1wnd7EGr3hOWYcXXrRqMEac3kxXhP96L4qANVIN352', 'Đỗ Thị Lan', '0901000025', 'a0000000-0000-0000-0000-000000000007', 'b0000000-0000-0000-0000-000000000004', 'NGHIEP_VU', 'EMPLOYEE');
+
+-- ============ EMPLOYEES — HO IT (kỹ thuật, multi-location) ============
+INSERT INTO employees (id, employee_code, email, password_hash, full_name, phone, organization_id, primary_location_id, employee_type, role) VALUES
+('e0000000-0000-0000-0000-000000000030', 'IT002', 'it002@hdbank.vn', '$2b$10$272SOTF0XTn1wnd7EGr3hOWYcXXrRqMEac3kxXhP96L4qANVIN352', 'Bùi Quang Dev', '0901000030', 'a0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000002', 'IT_KY_THUAT', 'EMPLOYEE'),
+('e0000000-0000-0000-0000-000000000031', 'IT003', 'it003@hdbank.vn', '$2b$10$272SOTF0XTn1wnd7EGr3hOWYcXXrRqMEac3kxXhP96L4qANVIN352', 'Vũ Thị QA', '0901000031', 'a0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000002', 'IT_KY_THUAT', 'EMPLOYEE'),
+('e0000000-0000-0000-0000-000000000032', 'IT004', 'it004@hdbank.vn', '$2b$10$272SOTF0XTn1wnd7EGr3hOWYcXXrRqMEac3kxXhP96L4qANVIN352', 'Lê Hoàng DevOps', '0901000032', 'a0000000-0000-0000-0000-000000000004', 'b0000000-0000-0000-0000-000000000003', 'IT_KY_THUAT', 'EMPLOYEE'),
+('e0000000-0000-0000-0000-000000000033', 'IT005', 'it005@hdbank.vn', '$2b$10$272SOTF0XTn1wnd7EGr3hOWYcXXrRqMEac3kxXhP96L4qANVIN352', 'Trịnh Minh BA', '0901000033', 'a0000000-0000-0000-0000-000000000003', 'b0000000-0000-0000-0000-000000000002', 'IT_KY_THUAT', 'EMPLOYEE');
+
+-- ========================
+-- SHIFT ASSIGNMENTS for new employees
+-- ========================
+INSERT INTO employee_shifts (employee_id, shift_id, effective_from) VALUES
+('e0000000-0000-0000-0000-000000000010', 'd0000000-0000-0000-0000-000000000001', '2026-01-01'),
+('e0000000-0000-0000-0000-000000000011', 'd0000000-0000-0000-0000-000000000001', '2026-01-01'),
+('e0000000-0000-0000-0000-000000000012', 'd0000000-0000-0000-0000-000000000001', '2026-01-01'),
+('e0000000-0000-0000-0000-000000000013', 'd0000000-0000-0000-0000-000000000001', '2026-01-01'),
+('e0000000-0000-0000-0000-000000000014', 'd0000000-0000-0000-0000-000000000001', '2026-01-01'),
+('e0000000-0000-0000-0000-000000000020', 'd0000000-0000-0000-0000-000000000001', '2026-01-01'),
+('e0000000-0000-0000-0000-000000000021', 'd0000000-0000-0000-0000-000000000001', '2026-01-01'),
+('e0000000-0000-0000-0000-000000000022', 'd0000000-0000-0000-0000-000000000001', '2026-01-01'),
+('e0000000-0000-0000-0000-000000000023', 'd0000000-0000-0000-0000-000000000001', '2026-01-01'),
+('e0000000-0000-0000-0000-000000000024', 'd0000000-0000-0000-0000-000000000002', '2026-01-01'),
+('e0000000-0000-0000-0000-000000000025', 'd0000000-0000-0000-0000-000000000002', '2026-01-01'),
+('e0000000-0000-0000-0000-000000000030', 'd0000000-0000-0000-0000-000000000001', '2026-01-01'),
+('e0000000-0000-0000-0000-000000000031', 'd0000000-0000-0000-0000-000000000001', '2026-01-01'),
+('e0000000-0000-0000-0000-000000000032', 'd0000000-0000-0000-0000-000000000001', '2026-01-01'),
+('e0000000-0000-0000-0000-000000000033', 'd0000000-0000-0000-0000-000000000001', '2026-01-01');
+
+-- ========================
+-- LEAVE BALANCES for all new employees (2026)
+-- ========================
+INSERT INTO leave_balances (employee_id, leave_type, year, total_days, used_days) VALUES
+('e0000000-0000-0000-0000-000000000010', 'ANNUAL', 2026, 20.00, 5.00),
+('e0000000-0000-0000-0000-000000000011', 'ANNUAL', 2026, 18.00, 3.00),
+('e0000000-0000-0000-0000-000000000012', 'ANNUAL', 2026, 18.00, 4.00),
+('e0000000-0000-0000-0000-000000000013', 'ANNUAL', 2026, 15.00, 2.00),
+('e0000000-0000-0000-0000-000000000014', 'ANNUAL', 2026, 15.00, 1.00),
+('e0000000-0000-0000-0000-000000000020', 'ANNUAL', 2026, 12.00, 2.00),
+('e0000000-0000-0000-0000-000000000021', 'ANNUAL', 2026, 12.00, 0.00),
+('e0000000-0000-0000-0000-000000000022', 'ANNUAL', 2026, 12.00, 5.00),
+('e0000000-0000-0000-0000-000000000023', 'ANNUAL', 2026, 12.00, 1.00),
+('e0000000-0000-0000-0000-000000000024', 'ANNUAL', 2026, 12.00, 3.00),
+('e0000000-0000-0000-0000-000000000025', 'ANNUAL', 2026, 12.00, 0.00),
+('e0000000-0000-0000-0000-000000000030', 'ANNUAL', 2026, 14.00, 2.00),
+('e0000000-0000-0000-0000-000000000031', 'ANNUAL', 2026, 14.00, 4.00),
+('e0000000-0000-0000-0000-000000000032', 'ANNUAL', 2026, 14.00, 1.00),
+('e0000000-0000-0000-0000-000000000033', 'ANNUAL', 2026, 14.00, 0.00);
+
+-- ========================
+-- LATE GRACE QUOTA — March 2026
+-- ========================
+INSERT INTO late_grace_quota (employee_id, month, year, max_allowed, used_count) VALUES
+('e0000000-0000-0000-0000-000000000020', 3, 2026, 4, 2),
+('e0000000-0000-0000-0000-000000000021', 3, 2026, 4, 0),
+('e0000000-0000-0000-0000-000000000022', 3, 2026, 4, 4),  -- EXHAUSTED
+('e0000000-0000-0000-0000-000000000023', 3, 2026, 4, 1),
+('e0000000-0000-0000-0000-000000000024', 3, 2026, 4, 3),  -- WARNING: 1 left
+('e0000000-0000-0000-0000-000000000025', 3, 2026, 4, 0),
+('e0000000-0000-0000-0000-000000000030', 3, 2026, 4, 1),
+('e0000000-0000-0000-0000-000000000031', 3, 2026, 4, 2),
+('e0000000-0000-0000-0000-000000000032', 3, 2026, 4, 0),
+('e0000000-0000-0000-0000-000000000033', 3, 2026, 4, 3);
+
+-- ========================
+-- ATTENDANCE RECORDS — March 24-28 (Mon-Fri), 2026
+-- Scenarios: on-time, late, early leave, suspicious, offline sync
+-- ========================
+
+-- === March 24 (Monday) — Normal day ===
+INSERT INTO attendance_records (employee_id, employee_code, check_type, check_time, location_id, wifi_bssid, wifi_ssid, verification_method, status, fraud_score) VALUES
+-- CN Q1 staff — all on time
+('e0000000-0000-0000-0000-000000000003', 'NV001', 'CHECK_IN',  '2026-03-24 07:50:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:04', 'HDBank-CNQ1', 'WIFI', 'VALID', 3),
+('e0000000-0000-0000-0000-000000000003', 'NV001', 'CHECK_OUT', '2026-03-24 17:05:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:04', 'HDBank-CNQ1', 'WIFI', 'VALID', 2),
+('e0000000-0000-0000-0000-000000000020', 'NV002', 'CHECK_IN',  '2026-03-24 07:55:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:04', 'HDBank-CNQ1', 'WIFI', 'VALID', 5),
+('e0000000-0000-0000-0000-000000000020', 'NV002', 'CHECK_OUT', '2026-03-24 17:02:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:04', 'HDBank-CNQ1', 'WIFI', 'VALID', 2),
+('e0000000-0000-0000-0000-000000000021', 'NV003', 'CHECK_IN',  '2026-03-24 07:58:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:05', 'HDBank-CNQ1-2', 'WIFI', 'VALID', 4),
+('e0000000-0000-0000-0000-000000000021', 'NV003', 'CHECK_OUT', '2026-03-24 17:10:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:05', 'HDBank-CNQ1-2', 'WIFI', 'VALID', 1),
+-- NV004 — LATE (08:25, grace=15min, so 10min late after grace)
+('e0000000-0000-0000-0000-000000000022', 'NV004', 'CHECK_IN',  '2026-03-24 08:25:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:04', 'HDBank-CNQ1', 'WIFI', 'VALID', 6),
+('e0000000-0000-0000-0000-000000000022', 'NV004', 'CHECK_OUT', '2026-03-24 17:00:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:04', 'HDBank-CNQ1', 'WIFI', 'VALID', 2),
+-- IT staff at HO
+('e0000000-0000-0000-0000-000000000004', 'IT001', 'CHECK_IN',  '2026-03-24 08:05:00+07', 'b0000000-0000-0000-0000-000000000002', 'AA:BB:CC:DD:EE:02', 'HDBank-HO-F2', 'WIFI', 'VALID', 5),
+('e0000000-0000-0000-0000-000000000004', 'IT001', 'CHECK_OUT', '2026-03-24 18:30:00+07', 'b0000000-0000-0000-0000-000000000002', 'AA:BB:CC:DD:EE:02', 'HDBank-HO-F2', 'WIFI', 'VALID', 3),
+('e0000000-0000-0000-0000-000000000030', 'IT002', 'CHECK_IN',  '2026-03-24 07:45:00+07', 'b0000000-0000-0000-0000-000000000002', 'AA:BB:CC:DD:EE:02', 'HDBank-HO-F2', 'WIFI', 'VALID', 2),
+('e0000000-0000-0000-0000-000000000030', 'IT002', 'CHECK_OUT', '2026-03-24 17:15:00+07', 'b0000000-0000-0000-0000-000000000002', 'AA:BB:CC:DD:EE:02', 'HDBank-HO-F2', 'WIFI', 'VALID', 1);
+
+-- === March 25 (Tuesday) — Some issues ===
+INSERT INTO attendance_records (employee_id, employee_code, check_type, check_time, location_id, wifi_bssid, wifi_ssid, verification_method, status, fraud_score, fraud_flags) VALUES
+-- NV001 on time
+('e0000000-0000-0000-0000-000000000003', 'NV001', 'CHECK_IN',  '2026-03-25 07:52:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:04', 'HDBank-CNQ1', 'WIFI', 'VALID', 4, NULL),
+('e0000000-0000-0000-0000-000000000003', 'NV001', 'CHECK_OUT', '2026-03-25 17:03:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:04', 'HDBank-CNQ1', 'WIFI', 'VALID', 2, NULL),
+-- NV002 — SUSPICIOUS check-in (GPS mismatch, fraud score 75)
+('e0000000-0000-0000-0000-000000000020', 'NV002', 'CHECK_IN',  '2026-03-25 07:58:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:04', 'HDBank-CNQ1', 'GPS', 'SUSPICIOUS', 75, '["GPS_LOCATION_MISMATCH","VPN_ACTIVE"]'),
+('e0000000-0000-0000-0000-000000000020', 'NV002', 'CHECK_OUT', '2026-03-25 17:01:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:04', 'HDBank-CNQ1', 'WIFI', 'VALID', 3, NULL),
+-- NV005 — EARLY LEAVE (left at 16:30)
+('e0000000-0000-0000-0000-000000000023', 'NV005', 'CHECK_IN',  '2026-03-25 07:55:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:04', 'HDBank-CNQ1', 'WIFI', 'VALID', 3, NULL),
+('e0000000-0000-0000-0000-000000000023', 'NV005', 'CHECK_OUT', '2026-03-25 16:30:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:04', 'HDBank-CNQ1', 'WIFI', 'VALID', 2, NULL),
+-- IT001 — multi-location check-in (morning HO F2, afternoon CN Q1)
+('e0000000-0000-0000-0000-000000000004', 'IT001', 'CHECK_IN',  '2026-03-25 08:00:00+07', 'b0000000-0000-0000-0000-000000000002', 'AA:BB:CC:DD:EE:02', 'HDBank-HO-F2', 'WIFI', 'VALID', 4, NULL),
+('e0000000-0000-0000-0000-000000000004', 'IT001', 'CHECK_OUT', '2026-03-25 12:00:00+07', 'b0000000-0000-0000-0000-000000000002', 'AA:BB:CC:DD:EE:02', 'HDBank-HO-F2', 'WIFI', 'VALID', 2, NULL),
+('e0000000-0000-0000-0000-000000000004', 'IT001', 'CHECK_IN',  '2026-03-25 13:30:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:04', 'HDBank-CNQ1', 'WIFI', 'VALID', 8, NULL),
+('e0000000-0000-0000-0000-000000000004', 'IT001', 'CHECK_OUT', '2026-03-25 18:00:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:04', 'HDBank-CNQ1', 'WIFI', 'VALID', 3, NULL);
+
+-- === March 26 (Wednesday) — Offline sync + fraud ===
+INSERT INTO attendance_records (employee_id, employee_code, check_type, check_time, location_id, wifi_bssid, wifi_ssid, verification_method, status, fraud_score, fraud_flags, is_offline, offline_uuid) VALUES
+-- NV003 — OFFLINE check-in (WiFi down, synced later)
+('e0000000-0000-0000-0000-000000000021', 'NV003', 'CHECK_IN',  '2026-03-26 07:50:00+07', 'b0000000-0000-0000-0000-000000000004', NULL, NULL, 'GPS', 'OFFLINE_SYNCED', 12, NULL, true, 'f0000000-0000-0000-0000-000000000001'),
+('e0000000-0000-0000-0000-000000000021', 'NV003', 'CHECK_OUT', '2026-03-26 17:05:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:05', 'HDBank-CNQ1-2', 'WIFI', 'VALID', 2, NULL, false, NULL),
+-- NV006 — MOCK LOCATION detected (fraud score 92, auto-escalated)
+('e0000000-0000-0000-0000-000000000024', 'NV006', 'CHECK_IN',  '2026-03-26 08:01:00+07', NULL, NULL, NULL, 'GPS', 'SUSPICIOUS', 92, '["MOCK_LOCATION_DETECTED","GPS_LOCATION_MISMATCH","ROOTED_DEVICE"]', false, NULL),
+-- Normal check-ins
+('e0000000-0000-0000-0000-000000000003', 'NV001', 'CHECK_IN',  '2026-03-26 07:48:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:04', 'HDBank-CNQ1', 'WIFI', 'VALID', 3, NULL, false, NULL),
+('e0000000-0000-0000-0000-000000000003', 'NV001', 'CHECK_OUT', '2026-03-26 17:10:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:04', 'HDBank-CNQ1', 'WIFI', 'VALID', 2, NULL, false, NULL),
+('e0000000-0000-0000-0000-000000000030', 'IT002', 'CHECK_IN',  '2026-03-26 08:10:00+07', 'b0000000-0000-0000-0000-000000000002', 'AA:BB:CC:DD:EE:02', 'HDBank-HO-F2', 'WIFI', 'VALID', 5, NULL, false, NULL),
+('e0000000-0000-0000-0000-000000000030', 'IT002', 'CHECK_OUT', '2026-03-26 19:00:00+07', 'b0000000-0000-0000-0000-000000000002', 'AA:BB:CC:DD:EE:02', 'HDBank-HO-F2', 'WIFI', 'VALID', 2, NULL, false, NULL);
+
+-- === March 27 (Thursday) — QR check-in + late ===
+INSERT INTO attendance_records (employee_id, employee_code, check_type, check_time, location_id, wifi_bssid, wifi_ssid, verification_method, status, fraud_score) VALUES
+-- NV007 — QR code check-in
+('e0000000-0000-0000-0000-000000000025', 'NV007', 'CHECK_IN',  '2026-03-27 07:55:00+07', 'b0000000-0000-0000-0000-000000000004', NULL, NULL, 'QR', 'VALID', 5),
+('e0000000-0000-0000-0000-000000000025', 'NV007', 'CHECK_OUT', '2026-03-27 17:00:00+07', 'b0000000-0000-0000-0000-000000000004', NULL, NULL, 'QR', 'VALID', 3),
+-- NV004 — Late again (3rd time this month, used grace)
+('e0000000-0000-0000-0000-000000000022', 'NV004', 'CHECK_IN',  '2026-03-27 08:30:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:04', 'HDBank-CNQ1', 'WIFI', 'VALID', 8),
+('e0000000-0000-0000-0000-000000000022', 'NV004', 'CHECK_OUT', '2026-03-27 17:00:00+07', 'b0000000-0000-0000-0000-000000000004', 'AA:BB:CC:DD:EE:04', 'HDBank-CNQ1', 'WIFI', 'VALID', 2),
+-- IT team normal
+('e0000000-0000-0000-0000-000000000031', 'IT003', 'CHECK_IN',  '2026-03-27 07:50:00+07', 'b0000000-0000-0000-0000-000000000002', 'AA:BB:CC:DD:EE:02', 'HDBank-HO-F2', 'WIFI', 'VALID', 3),
+('e0000000-0000-0000-0000-000000000031', 'IT003', 'CHECK_OUT', '2026-03-27 17:30:00+07', 'b0000000-0000-0000-0000-000000000002', 'AA:BB:CC:DD:EE:02', 'HDBank-HO-F2', 'WIFI', 'VALID', 1),
+('e0000000-0000-0000-0000-000000000032', 'IT004', 'CHECK_IN',  '2026-03-27 08:00:00+07', 'b0000000-0000-0000-0000-000000000003', 'AA:BB:CC:DD:EE:03', 'HDBank-HO-F3', 'WIFI', 'VALID', 4),
+('e0000000-0000-0000-0000-000000000032', 'IT004', 'CHECK_OUT', '2026-03-27 18:15:00+07', 'b0000000-0000-0000-0000-000000000003', 'AA:BB:CC:DD:EE:03', 'HDBank-HO-F3', 'WIFI', 'VALID', 2);
+
+-- ========================
+-- LEAVE REQUESTS — Various statuses
+-- ========================
+INSERT INTO leave_requests (id, employee_id, leave_type, start_date, end_date, reason, status, current_approver_id, approval_level) VALUES
+-- Approved leave
+('d1000000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000022', 'ANNUAL', '2026-04-01', '2026-04-03', 'Nghỉ phép gia đình', 'APPROVED', 'e0000000-0000-0000-0000-000000000002', 1),
+-- Pending leave — waiting for manager approval
+('d1000000-0000-0000-0000-000000000002', 'e0000000-0000-0000-0000-000000000020', 'ANNUAL', '2026-04-07', '2026-04-08', 'Có việc cá nhân cần giải quyết', 'PENDING', 'e0000000-0000-0000-0000-000000000002', 1),
+-- Pending leave — sick leave urgent
+('d1000000-0000-0000-0000-000000000003', 'e0000000-0000-0000-0000-000000000023', 'SICK', '2026-03-31', '2026-03-31', 'Bị cảm sốt, có giấy bác sĩ', 'PENDING', 'e0000000-0000-0000-0000-000000000002', 1),
+-- Rejected leave
+('d1000000-0000-0000-0000-000000000004', 'e0000000-0000-0000-0000-000000000024', 'ANNUAL', '2026-03-20', '2026-03-25', 'Đi du lịch', 'REJECTED', 'e0000000-0000-0000-0000-000000000002', 1),
+-- IT employee leave — pending
+('d1000000-0000-0000-0000-000000000005', 'e0000000-0000-0000-0000-000000000030', 'ANNUAL', '2026-04-14', '2026-04-15', 'Nghỉ lễ Giỗ Tổ Hùng Vương kéo dài', 'PENDING', 'e0000000-0000-0000-0000-000000000014', 1),
+-- Personal leave
+('d1000000-0000-0000-0000-000000000006', 'e0000000-0000-0000-0000-000000000021', 'PERSONAL', '2026-04-10', '2026-04-10', 'Đưa con đi khám bệnh', 'PENDING', 'e0000000-0000-0000-0000-000000000002', 1);
+
+-- Leave approvals for approved/rejected ones
+INSERT INTO leave_approvals (leave_request_id, approver_id, level, status, comment, decided_at) VALUES
+('d1000000-0000-0000-0000-000000000001', 'e0000000-0000-0000-0000-000000000002', 1, 'APPROVED', 'Đồng ý. Đã sắp xếp người thay.', '2026-03-20 10:00:00+07'),
+('d1000000-0000-0000-0000-000000000004', 'e0000000-0000-0000-0000-000000000002', 1, 'REJECTED', 'Trùng lịch kiểm toán chi nhánh, không được nghỉ.', '2026-03-18 14:00:00+07');
+
+-- ========================
+-- ANOMALY SCORES
+-- ========================
+INSERT INTO anomaly_scores (attendance_record_id, employee_id, risk_score, anomaly_type, description, model_version, review_status) VALUES
+-- NV002 suspicious GPS
+((SELECT id FROM attendance_records WHERE employee_code='NV002' AND check_time='2026-03-25 07:58:00+07'), 'e0000000-0000-0000-0000-000000000020', 75, 'LOCATION_ANOMALY', 'GPS location 2.3km from expected office. VPN detected.', 'v1.0-isolation-forest', 'PENDING'),
+-- NV006 mock location — high risk, escalated
+((SELECT id FROM attendance_records WHERE employee_code='NV006' AND check_time='2026-03-26 08:01:00+07'), 'e0000000-0000-0000-0000-000000000024', 92, 'BUDDY_PUNCHING', 'Mock location app detected. Rooted device. GPS coordinates inconsistent with any office location.', 'v1.0-isolation-forest', 'PENDING');
+
+-- ========================
+-- TIMESHEETS — February 2026 (locked)
+-- ========================
+INSERT INTO timesheets (employee_id, period_month, period_year, status, total_work_days, total_late_count, total_early_leave_count, total_absent_count, total_ot_hours, total_late_grace_used, approved_by, approved_at, locked_by, locked_at) VALUES
+('e0000000-0000-0000-0000-000000000003', 2, 2026, 'LOCKED', 20.00, 1, 0, 1, 2.50, 1, 'e0000000-0000-0000-0000-000000000002', '2026-03-03 10:00:00+07', 'e0000000-0000-0000-0000-000000000001', '2026-03-05 09:00:00+07'),
+('e0000000-0000-0000-0000-000000000020', 2, 2026, 'LOCKED', 21.00, 0, 0, 0, 0.00, 0, 'e0000000-0000-0000-0000-000000000002', '2026-03-03 10:05:00+07', 'e0000000-0000-0000-0000-000000000001', '2026-03-05 09:00:00+07'),
+('e0000000-0000-0000-0000-000000000004', 2, 2026, 'LOCKED', 20.00, 2, 0, 1, 8.00, 2, 'e0000000-0000-0000-0000-000000000014', '2026-03-03 11:00:00+07', 'e0000000-0000-0000-0000-000000000001', '2026-03-05 09:00:00+07');
+
+-- March 2026 timesheets (in progress)
+INSERT INTO timesheets (employee_id, period_month, period_year, status, total_work_days, total_late_count, total_early_leave_count, total_absent_count, total_ot_hours, total_late_grace_used) VALUES
+('e0000000-0000-0000-0000-000000000003', 3, 2026, 'DRAFT', 19.00, 2, 0, 0, 1.00, 2),
+('e0000000-0000-0000-0000-000000000020', 3, 2026, 'PENDING_REVIEW', 18.00, 1, 0, 1, 0.00, 1),
+('e0000000-0000-0000-0000-000000000022', 3, 2026, 'DRAFT', 17.00, 5, 0, 2, 0.00, 4),
+('e0000000-0000-0000-0000-000000000004', 3, 2026, 'DRAFT', 20.00, 1, 0, 0, 6.50, 1),
+('e0000000-0000-0000-0000-000000000030', 3, 2026, 'PENDING_REVIEW', 20.00, 0, 0, 0, 4.00, 0);
+
+-- ========================
+-- REPORT AGGREGATION — Sample daily data
+-- ========================
+INSERT INTO report_attendance_daily (date, organization_id, total_employees, present_count, absent_count, late_count, early_leave_count, on_leave_count, suspicious_count) VALUES
+('2026-03-24', 'a0000000-0000-0000-0000-000000000006', 8, 7, 0, 1, 0, 1, 0),
+('2026-03-25', 'a0000000-0000-0000-0000-000000000006', 8, 6, 1, 0, 1, 1, 1),
+('2026-03-26', 'a0000000-0000-0000-0000-000000000006', 8, 7, 0, 0, 0, 1, 1),
+('2026-03-27', 'a0000000-0000-0000-0000-000000000006', 8, 7, 0, 1, 0, 1, 0),
+('2026-03-28', 'a0000000-0000-0000-0000-000000000006', 8, 8, 0, 0, 0, 0, 0),
+('2026-03-24', 'a0000000-0000-0000-0000-000000000004', 5, 5, 0, 0, 0, 0, 0),
+('2026-03-25', 'a0000000-0000-0000-0000-000000000004', 5, 4, 0, 0, 0, 1, 0),
+('2026-03-26', 'a0000000-0000-0000-0000-000000000004', 5, 5, 0, 1, 0, 0, 0),
+('2026-03-27', 'a0000000-0000-0000-0000-000000000004', 5, 5, 0, 0, 0, 0, 0);
+
+INSERT INTO report_kpi_daily (date, organization_id, attendance_rate, on_time_rate, avg_work_hours, ot_hours, leave_rate) VALUES
+('2026-03-24', 'a0000000-0000-0000-0000-000000000006', 87.50, 85.70, 8.20, 1.50, 12.50),
+('2026-03-25', 'a0000000-0000-0000-0000-000000000006', 75.00, 83.30, 8.10, 0.00, 12.50),
+('2026-03-26', 'a0000000-0000-0000-0000-000000000006', 87.50, 100.00, 8.30, 2.00, 12.50),
+('2026-03-27', 'a0000000-0000-0000-0000-000000000006', 87.50, 85.70, 8.15, 0.50, 12.50),
+('2026-03-28', 'a0000000-0000-0000-0000-000000000006', 100.00, 100.00, 8.00, 0.00, 0.00);
+
+-- ========================
+-- NOTIFICATION LOG samples
+-- ========================
+INSERT INTO notification_logs (employee_id, type, title, body, status) VALUES
+('e0000000-0000-0000-0000-000000000022', 'PUSH', 'Nhắc nhở chấm công', 'Bạn chưa chấm công hôm nay. Vui lòng chấm công trước 9:00.', 'SENT'),
+('e0000000-0000-0000-0000-000000000024', 'PUSH', 'Cảnh báo gian lận', 'Hệ thống phát hiện bất thường trong chấm công của bạn ngày 26/03. Vui lòng liên hệ HR.', 'SENT'),
+('e0000000-0000-0000-0000-000000000020', 'EMAIL', 'Đơn nghỉ phép đã gửi', 'Đơn nghỉ phép ngày 07-08/04/2026 đã được gửi đến quản lý phê duyệt.', 'SENT'),
+('e0000000-0000-0000-0000-000000000002', 'PUSH', 'Đơn nghỉ phép chờ duyệt', 'Có 3 đơn nghỉ phép đang chờ bạn phê duyệt.', 'SENT'),
+('e0000000-0000-0000-0000-000000000022', 'PUSH', 'Hết quota trễ có phép', 'Bạn đã sử dụng hết 4/4 lần trễ có phép trong tháng 3. Lần trễ tiếp theo sẽ bị tính trễ không phép.', 'SENT');

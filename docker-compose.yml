@@ -1,0 +1,232 @@
+include:
+  - docker-compose.infra.yml
+
+services:
+  gateway:
+    build:
+      context: ./backend
+      dockerfile: gateway/Dockerfile
+    container_name: sa-gateway
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      JWT_SECRET: ${JWT_SECRET:-myLocalDevSecretKeyThatIsAtLeast256BitsLong1234567890}
+    ports:
+      - "${GATEWAY_PORT:-8080}:8080"
+    depends_on:
+      auth-service:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8080/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 15s
+    networks:
+      - sa-network
+
+  auth-service:
+    build:
+      context: ./backend
+      dockerfile: auth-service/Dockerfile
+    container_name: sa-auth-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-master:5432/${POSTGRES_DB:-smart_attendance}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-sa_admin}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-localdev123}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:-localdev123}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      JWT_SECRET: ${JWT_SECRET:-myLocalDevSecretKeyThatIsAtLeast256BitsLong1234567890}
+      SPRING_MAIL_HOST: mailhog
+      SPRING_MAIL_PORT: 1025
+    ports:
+      - "${AUTH_SERVICE_PORT:-8081}:8081"
+    depends_on:
+      postgres-master:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+    networks:
+      - sa-network
+
+  attendance-service:
+    build:
+      context: ./backend
+      dockerfile: attendance-service/Dockerfile
+    container_name: sa-attendance-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-master:5432/${POSTGRES_DB:-smart_attendance}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-sa_admin}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-localdev123}
+      SPRING_DATASOURCE_REPLICA_URL: jdbc:postgresql://postgres-slave:5432/${POSTGRES_DB:-smart_attendance}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:-localdev123}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      JWT_SECRET: ${JWT_SECRET:-myLocalDevSecretKeyThatIsAtLeast256BitsLong1234567890}
+    ports:
+      - "${ATTENDANCE_SERVICE_PORT:-8082}:8082"
+    depends_on:
+      postgres-master:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+    networks:
+      - sa-network
+
+  admin-service:
+    build:
+      context: ./backend
+      dockerfile: admin-service/Dockerfile
+    container_name: sa-admin-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-master:5432/${POSTGRES_DB:-smart_attendance}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-sa_admin}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-localdev123}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:-localdev123}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin123}
+      JWT_SECRET: ${JWT_SECRET:-myLocalDevSecretKeyThatIsAtLeast256BitsLong1234567890}
+    ports:
+      - "${ADMIN_SERVICE_PORT:-8083}:8083"
+    depends_on:
+      postgres-master:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+    networks:
+      - sa-network
+
+  notification-service:
+    build:
+      context: ./backend
+      dockerfile: notification-service/Dockerfile
+    container_name: sa-notification-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-master:5432/${POSTGRES_DB:-smart_attendance}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-sa_admin}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-localdev123}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      NTFY_URL: http://ntfy:80
+      SPRING_MAIL_HOST: mailhog
+      SPRING_MAIL_PORT: 1025
+      JWT_SECRET: ${JWT_SECRET:-myLocalDevSecretKeyThatIsAtLeast256BitsLong1234567890}
+    ports:
+      - "${NOTIFICATION_SERVICE_PORT:-8084}:8084"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+    networks:
+      - sa-network
+
+  report-service:
+    build:
+      context: ./backend
+      dockerfile: report-service/Dockerfile
+    container_name: sa-report-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-master:5432/${POSTGRES_DB:-smart_attendance}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-sa_admin}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-localdev123}
+      SPRING_DATASOURCE_REPLICA_URL: jdbc:postgresql://postgres-slave:5432/${POSTGRES_DB:-smart_attendance}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin123}
+      JWT_SECRET: ${JWT_SECRET:-myLocalDevSecretKeyThatIsAtLeast256BitsLong1234567890}
+    ports:
+      - "${REPORT_SERVICE_PORT:-8085}:8085"
+    depends_on:
+      postgres-master:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+    networks:
+      - sa-network
+
+  ai-service:
+    build:
+      context: ./backend/ai-service
+      dockerfile: Dockerfile
+    container_name: sa-ai-service
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-sa_admin}:${POSTGRES_PASSWORD:-localdev123}@postgres-master:5432/${POSTGRES_DB:-smart_attendance}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-localdev123}@redis:6379/0
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      JWT_SECRET: ${JWT_SECRET:-myLocalDevSecretKeyThatIsAtLeast256BitsLong1234567890}
+    ports:
+      - "${AI_SERVICE_PORT:-8086}:8086"
+    depends_on:
+      postgres-master:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8086/actuator/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - sa-network
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: sa-web
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      gateway:
+        condition: service_started
+    networks:
+      - sa-network

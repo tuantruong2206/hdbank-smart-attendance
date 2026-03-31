@@ -1,0 +1,174 @@
+services:
+  postgres-master:
+    image: postgis/postgis:16-3.4
+    container_name: sa-postgres-master
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-smart_attendance}
+      POSTGRES_USER: ${POSTGRES_USER:-sa_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-localdev123}
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    ports:
+      - "${POSTGRES_MASTER_PORT:-5432}:5432"
+    volumes:
+      - postgres-master-data:/var/lib/postgresql/data
+      - ./infra/postgres/init-master.sh:/docker-entrypoint-initdb.d/init-master.sh
+    command: >
+      postgres
+        -c wal_level=replica
+        -c max_wal_senders=3
+        -c max_replication_slots=3
+        -c hot_standby=on
+        -c shared_preload_libraries='pg_stat_statements'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sa_admin} -d ${POSTGRES_DB:-smart_attendance}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sa-network
+
+  postgres-slave:
+    image: postgis/postgis:16-3.4
+    container_name: sa-postgres-slave
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-smart_attendance}
+      POSTGRES_USER: ${POSTGRES_USER:-sa_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-localdev123}
+      PGUSER: ${POSTGRES_USER:-sa_admin}
+    ports:
+      - "${POSTGRES_SLAVE_PORT:-5433}:5432"
+    volumes:
+      - postgres-slave-data:/var/lib/postgresql/data
+      - ./infra/postgres/init-slave.sh:/docker-entrypoint-initdb.d/init-slave.sh
+    depends_on:
+      postgres-master:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sa_admin}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sa-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: sa-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD:-localdev123} --appendonly yes
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-localdev123}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sa-network
+
+  kafka:
+    image: apache/kafka:3.7.0
+    container_name: sa-kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_NUM_PARTITIONS: 3
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    ports:
+      - "${KAFKA_EXTERNAL_PORT:-29092}:29092"
+    volumes:
+      - kafka-data:/tmp/kraft-combined-logs
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - sa-network
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: sa-kafka-ui
+    environment:
+      KAFKA_CLUSTERS_0_NAME: smart-attendance
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    ports:
+      - "${KAFKA_UI_PORT:-8090}:8080"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - sa-network
+
+  minio:
+    image: minio/minio:latest
+    container_name: sa-minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin123}
+    command: server /data --console-address ":9001"
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sa-network
+
+  ntfy:
+    image: binwiederhier/ntfy:latest
+    container_name: sa-ntfy
+    command: serve
+    ports:
+      - "${NTFY_PORT:-8095}:80"
+    volumes:
+      - ntfy-data:/var/lib/ntfy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - sa-network
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: sa-mailhog
+    ports:
+      - "${MAILHOG_SMTP_PORT:-1025}:1025"
+      - "${MAILHOG_UI_PORT:-8025}:8025"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8025"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - sa-network
+
+volumes:
+  postgres-master-data:
+  postgres-slave-data:
+  redis-data:
+  kafka-data:
+  minio-data:
+  ntfy-data:
+
+networks:
+  sa-network:
+    driver: bridge
