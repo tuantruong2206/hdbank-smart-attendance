@@ -235,6 +235,64 @@ curl -s http://localhost:8080/api/v1/admin/organizations | jq .
 
 ---
 
+## Viewing Logs (Real-time)
+
+All log commands must be run from the project root directory:
+```bash
+cd ~/Desktop/AI-HOME/claude_code/smart_attendance
+```
+
+No restart needed — these read live logs from running containers.
+
+```bash
+# Follow one service (most common)
+docker compose logs -f attendance-service
+
+# Follow multiple services
+docker compose logs -f gateway auth-service attendance-service
+
+# Follow all services (verbose)
+docker compose logs -f
+
+# Show last 50 lines then follow
+docker compose logs -f --tail 50 attendance-service
+
+# Show last 100 lines (no follow, just dump)
+docker compose logs --tail 100 attendance-service
+```
+
+Press **Ctrl+C** to stop following logs.
+
+### Useful log filters
+
+```bash
+# Only errors
+docker compose logs -f attendance-service 2>&1 | grep ERROR
+
+# Check-in events
+docker compose logs -f attendance-service 2>&1 | grep "check-in\|CHECK_IN"
+
+# Kafka events
+docker compose logs -f notification-service 2>&1 | grep "Received"
+
+# Auth login attempts
+docker compose logs -f auth-service 2>&1 | grep "LOGIN"
+```
+
+### Service log locations
+
+| What to Watch | Command |
+|---------------|---------|
+| Check-in/out activity | `docker compose logs -f attendance-service` |
+| Login / auth issues | `docker compose logs -f auth-service` |
+| API routing | `docker compose logs -f gateway` |
+| Push / email delivery | `docker compose logs -f notification-service` |
+| Dashboard metrics | `docker compose logs -f report-service` |
+| AI anomaly / chatbot | `docker compose logs -f ai-service` |
+| Admin operations | `docker compose logs -f admin-service` |
+
+---
+
 ## Stopping Everything
 
 ```bash

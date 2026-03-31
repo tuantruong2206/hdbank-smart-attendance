@@ -42,6 +42,32 @@
 
 ## Demo Scenarios
 
+### Viewing Backend Logs (Recommended During Demo)
+
+Open a **separate terminal** to watch real-time backend logs while testing:
+
+```bash
+cd ~/Desktop/AI-HOME/claude_code/smart_attendance
+
+# Watch check-in/out, timesheet, leave activity
+docker compose logs -f attendance-service
+
+# Watch login, 2FA, auth events
+docker compose logs -f auth-service
+
+# Watch all key services at once
+docker compose logs -f gateway auth-service attendance-service notification-service
+
+# Watch push/email notifications being sent
+docker compose logs -f notification-service
+```
+
+> Press **Ctrl+C** to stop. No restart needed — logs are streamed live from running containers.
+
+This is especially useful for scenarios 1-6 (check-in), 8 (chatbot), 12 (SLA), and 17 (circuit breaker).
+
+---
+
 ### Mobile App Setup (Before Running Mobile Scenarios)
 
 **Emulator (iOS/Android)**:
