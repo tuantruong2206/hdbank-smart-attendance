@@ -79,11 +79,9 @@ public class CheckInService implements CheckInUseCase, CheckOutUseCase {
         // 1. Determine verification scenario (5 scenarios)
         VerificationOutcome verification = resolveVerification(command);
 
-        // 2. Check duplicates (only for CHECK_IN)
+        // 2. Check duplicates (for both CHECK_IN and CHECK_OUT)
         Instant checkTime = command.isOffline() ? command.offlineTimestamp() : Instant.now();
-        if (checkType == AttendanceRecord.CheckType.CHECK_IN) {
-            duplicateGuard.check(command.employeeId(), command.employeeType(), null, checkTime);
-        }
+        duplicateGuard.check(command.employeeId(), command.employeeType(), null, checkTime, checkType);
 
         // 3. Score fraud (skip for MANUAL entries)
         Location location = verification.locationId != null
