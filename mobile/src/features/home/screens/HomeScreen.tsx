@@ -43,7 +43,26 @@ export default function HomeScreen() {
 
   const todayQuery = useQuery<TodayAttendance>({
     queryKey: ['attendance', 'today'],
-    queryFn: () => api.get('/attendance/today').then((r) => r.data.data),
+    queryFn: async () => {
+      const [todayRes, shiftRes] = await Promise.all([
+        api.get('/attendance/today').then((r) => r.data.data).catch(() => []),
+        api.get('/attendance/current-shift').then((r) => r.data.data).catch(() => null),
+      ]);
+      const records = Array.isArray(todayRes) ? todayRes : [];
+      const checkIn = records.find((r: any) => r.checkType === 'CHECK_IN');
+      const checkOut = records.find((r: any) => r.checkType === 'CHECK_OUT');
+      let status: TodayAttendance['status'] = 'NOT_CHECKED_IN';
+      if (checkOut) status = 'CHECKED_OUT';
+      else if (checkIn) status = 'CHECKED_IN';
+      return {
+        checkInTime: checkIn?.checkTime ?? null,
+        checkOutTime: checkOut?.checkTime ?? null,
+        status,
+        shiftName: shiftRes?.shiftName ?? 'Ca sáng',
+        shiftStart: shiftRes?.shiftStart ?? '08:00',
+        shiftEnd: shiftRes?.shiftEnd ?? '17:00',
+      };
+    },
   });
 
   const graceQuery = useQuery<LateGraceQuota>({
