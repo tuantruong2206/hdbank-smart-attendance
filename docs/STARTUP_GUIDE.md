@@ -293,6 +293,42 @@ docker compose logs -f auth-service 2>&1 | grep "LOGIN"
 
 ---
 
+## When Do I Need to Restart?
+
+| What Changed | Restart? | Command |
+|-------------|----------|---------|
+| **Backend Java code** | Yes — rebuild Docker image | `docker compose build <service> && docker compose up -d <service>` |
+| **Mobile TypeScript code** | No — Expo hot reloads | Just save the file |
+| **Web TypeScript code** | No — Vite hot reloads | Just save the file |
+| **Database schema (SQL)** | No rebuild needed | Run SQL directly via `docker exec sa-postgres-master psql ...` |
+| **Docker Compose config** | Yes — recreate container | `docker compose up -d` |
+| **application.yml** | Yes — rebuild | `docker compose build <service> && docker compose up -d <service>` |
+| **.env** | Yes — recreate | `docker compose up -d` |
+
+### Common commands
+
+```bash
+# Rebuild + restart one backend service (after Java code change)
+docker compose build attendance-service && docker compose up -d attendance-service
+
+# Rebuild + restart ALL backend services
+docker compose up -d --build
+
+# Restart without rebuild (config change only, same code)
+docker compose restart attendance-service
+
+# Mobile: force reload in Expo Go
+# → Shake device → tap "Reload"
+# → Or close and reopen Expo Go app
+
+# Web: hard refresh in browser
+# → Cmd+Shift+R (Mac) or Ctrl+Shift+R (Windows)
+```
+
+> **Tip**: After a backend fix, you may also need to clear the mobile/web cache. TanStack Query caches API responses — shake your phone → "Reload" or hard-refresh the browser.
+
+---
+
 ## Stopping Everything
 
 ```bash
