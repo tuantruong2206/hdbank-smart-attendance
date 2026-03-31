@@ -124,6 +124,30 @@ public class CheckInController {
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 
+    @PostMapping("/apply-late-grace")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> applyLateGrace(
+            @RequestHeader("X-User-Id") String userId) {
+        UUID employeeId = UUID.fromString(userId);
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Ho_Chi_Minh"));
+        LateGraceQuota quota = lateGraceQuotaRepository
+                .findByEmployeeAndMonth(employeeId, today.getYear(), today.getMonthValue())
+                .orElse(LateGraceQuota.builder()
+                        .employeeId(employeeId)
+                        .month(today.getMonthValue())
+                        .year(today.getYear())
+                        .maxAllowed(4)
+                        .usedCount(0)
+                        .build());
+        quota.use(); // throws if exhausted
+        lateGraceQuotaRepository.save(quota);
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("used", quota.getUsedCount());
+        result.put("total", quota.getMaxAllowed());
+        result.put("remaining", quota.getRemainingCount());
+        result.put("message", "Đã áp dụng trễ có phép. Còn " + quota.getRemainingCount() + "/" + quota.getMaxAllowed() + " lần.");
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
     private CheckInCommand toCommand(CheckInRequest req, UUID userId) {
         List<BssidSignal> signals = req.bssidSignals() != null
                 ? req.bssidSignals().stream()
